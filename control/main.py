@@ -23,7 +23,7 @@ root.include_router(login.root)
 root.include_router(schoolProfile.root)
 
 origins = [
-    "https://school-design-angular.herokuapp.com/"
+    "https://school-design-angular.herokuapp.com"
 ]
 root.add_middleware(
     CORSMiddleware,
