@@ -6,7 +6,7 @@ from dbconnect import db
 from sqlalchemy import select , insert
 from auth import encrypt
 
-model.Base.metadata.create_all(bind=db.engine)
+# model.Base.metadata.create_all(bind=db.engine)
 
 query = select(model.user.username).where(model.user.username == "ADMIN@ADMIN")
 with db.engine.connect() as connect:
