@@ -15,7 +15,7 @@ with db.engine.connect() as connect:
         data=row
         print(row)
     if not data:
-        connect.execute(insert(model.user),{"name":"ADMIN","gender":"male","dob":"17-07-2002","mobile":1234567890,"email":"admin@admin.com","username":"ADMIN@ADMIN","password":encrypt.hash("ADMIN@ADMIN"),"role":2,"district":"krishnagiri"})
+        connect.execute(insert(model.user),{"name":"ADMIN","gender":"male","dob":"17/07/2002","mobile":1234567890,"email":"admin@admin.com","username":"ADMIN@ADMIN","password":encrypt.hash("ADMIN@ADMIN"),"role":2,"district":"krishnagiri"})
         
 root=FastAPI()
 
