@@ -32,7 +32,7 @@ root.add_middleware(
     allow_headers=["*"]    
 )
 
-root.get("/")
+root.get("")
 def gets():
     return {"message":"Hello"}
     
