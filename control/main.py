@@ -23,7 +23,8 @@ root.include_router(login.root)
 root.include_router(schoolProfile.root)
 
 origins = [
-    "https://school-design-angular.herokuapp.com"
+    "https://school-design-angular.herokuapp.com",
+    "http://localhost:4200"
 ]
 root.add_middleware(
     CORSMiddleware,
@@ -32,7 +33,7 @@ root.add_middleware(
     allow_headers=["*"]    
 )
 
-root.get("")
+@root.get("/")
 def gets():
     return {"message":"Hello"}
     
