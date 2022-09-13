@@ -1,5 +1,5 @@
 import random
-from fastapi import Depends,HTTPException,status ,APIRouter
+from fastapi import Depends,HTTPException,status ,APIRouter , Response
 from sqlalchemy.orm import Session
 from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,14 +13,16 @@ root = APIRouter(
 )
 
 #registration API    
-@root.post('/register')
-def register(data:schema.registers,db:Session=Depends(db.get_db)):
+@root.post('/register',status_code=status.HTTP_201_CREATED)
+def register(data:schema.registers, response : Response,db:Session=Depends(db.get_db)):
     user=db.query(model.user).filter(model.user.username == data.username).first()
     if user:
+        response.status_code=status.HTTP_409_CONFLICT
         return {"msg":"try with another username"}
     else :
         mail=db.query(model.user).filter(model.user.email == data.email).first()
         if mail:
+            response.status_code=status.HTTP_409_CONFLICT
             return {"msg":"Already register with this mail Id. try with another one"}
     
     enc=encrypt.hash(data.password)
@@ -29,7 +31,7 @@ def register(data:schema.registers,db:Session=Depends(db.get_db)):
     db.add(new_data)
     db.commit()
     db.refresh(new_data)
-    return {"status":"Success"}
+    return new_data
 
         
 #login api
@@ -102,18 +104,21 @@ def delete(db : Session = Depends(db.get_db) , current_user = Depends(auth.curre
         
 #change password    
 @root.post('/pwd')
-def pwdchg(password : schema.pwds , db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
+def pwdchg(password : schema.pwds , response :Response , db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
     if password.oldPwd == password.newPwd :
-        return {"status":2}
+        response.status_code=status.HTTP_406_NOT_ACCEPTABLE
+        return {"status":2 ,"msg":"old and new password should not be same"}
     get = db.query(model.user).filter(model.user.id == current_user.id)
     decode = encrypt.check(password.oldPwd ,get.first().password)
     if not decode:
-        return {"status":0}
+        response.status_code=status.HTTP_403_FORBIDDEN
+        return {"status":0 , "msg":"old password is incorrect"}
     else:
         encode = encrypt.hash(password.newPwd)
         get.update({"password":encode},synchronize_session=False)
         db.commit()
-        return {"status":1}
+        response.status_code=status.HTTP_202_ACCEPTED
+        return {"status":1 , "msg":"password changed"}
     
 #generate pin
 @root.post('/pinGenerate')

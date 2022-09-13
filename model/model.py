@@ -12,7 +12,7 @@ class user(Base):
     name=Column(String,nullable=False)
     gender=Column(String,nullable=False)
     dob=Column(Date,nullable=False)
-    mobile=Column(String,nullable=False)
+    mobile=Column(BigInteger,nullable=False)
     email=Column(String,nullable=False,unique=True)
     username=Column(String,nullable=False , unique=True)
     password=Column(String,nullable=False)
