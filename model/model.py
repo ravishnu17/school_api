@@ -16,7 +16,7 @@ class user(Base):
     email=Column(String,nullable=False,unique=True)
     username=Column(String,nullable=False , unique=True)
     password=Column(String,nullable=False)
-    role=Column(Integer,nullable=False , server_default=text('0'))
+    role=Column(Integer,nullable=False )
     district=Column(String,nullable=False)
     time=Column(TIMESTAMP,nullable=False,server_default=text('now()'))
         

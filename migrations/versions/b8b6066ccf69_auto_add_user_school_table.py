@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('username', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
-    sa.Column('role', sa.Integer(), server_default=sa.text('0'), nullable=False),
+    sa.Column('role', sa.Integer(), nullable=False),
     sa.Column('district', sa.String(), nullable=False),
     sa.Column('time', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),

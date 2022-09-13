@@ -56,12 +56,13 @@ def check(db:Session=Depends(db.get_db) ,current_user = Depends(auth.current_use
 
 #get all user name
 @root.get('/getUser')
-def getUser(db:Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
+def getUser(response:Response , db:Session = Depends(db.get_db), current_user = Depends(auth.current_user)):
     check = db.query(model.user).filter(model.user.id == current_user.id , model.user.role == current_user.role).first()
     if check.role ==2 :
        user = db.query(model.user.username,model.user.name,model.user.role).filter(model.user.name !="ADMIN").all()
     else :
-        return {"You are not admin"}   
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"detail":"You are not admin"}   
     return user
 
 #get detail by id
@@ -72,17 +73,19 @@ def profile(db:Session=Depends(db.get_db) , current_user = Depends(auth.current_
 
 #update user detail
 @root.post('/profileUpdate')
-def update(data:schema.updates,db:Session=Depends(db.get_db),current_user = Depends(auth.current_user)):
+def update(data:schema.updates,response:Response ,db:Session=Depends(db.get_db),current_user = Depends(auth.current_user)):
     all=db.query(model.user).filter(model.user.id == current_user.id).first()
     if all.email != data.email: 
         user=db.query(model.user).filter(model.user.email != all.email).all()
         for val in user:
             if data.email == val.email:
-                return {"data":data,"msg":"This mail id already registered"}         
+                response.status_code = status.HTTP_409_CONFLICT
+                return {"msg":"This mail id already registered"}         
     elif all.username != data.username:
         user=db.query(model.user).filter(model.user.username != all.username).all()
         for val in user:
             if data.username == val.username:
+                response.status_code = status.HTTP_409_CONFLICT
                 return {"msg":"Try with another username"}
     old_data=db.query(model.user).filter(model.user.id == current_user.id)
     
@@ -90,17 +93,18 @@ def update(data:schema.updates,db:Session=Depends(db.get_db),current_user = Depe
         old_data.update(data.dict(),synchronize_session=False)
         db.commit()
         data = old_data.first()
-        return data
+        return {"data":data , "msg":"updated"}
     
  #delete user   
 @root.delete("/delete")
-def delete(db : Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
+def delete(response : Response, db : Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
         old_data = db.query(model.user).filter(model.user.id == current_user.id)
         if not old_data.first():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="User not found")
         old_data.delete(synchronize_session=False)
         db.commit()
-        return HTTPException(status_code=status.HTTP_204_NO_CONTENT , detail="Deleted successfully")
+        response.status_code=status.HTTP_204_NO_CONTENT
+        return {"detail":"deleted successfully"}
         
 #change password    
 @root.post('/pwd')
@@ -152,27 +156,35 @@ def forgotPwd(data:schema.ForgotPwd ,db:Session=Depends(db.get_db)):
 
 #change Role:
 @root.post('/change' )
-def change(data:schema.change , db:Session=Depends(db.get_db)):
-    try:
-        get = db.query(model.user).filter(model.user.username == data.username)
-        if get.first():
-            user = get.first()
-            get.update(data.dict(), synchronize_session=False)
-            db.commit()
-            if data.role == 1:
-                check = db.query(model.schoolProfile).filter(model.schoolProfile.user_id == get.first().id).first()
-                if not check:
-                    admin_table = model.schoolProfile(user_id = get.first().id , username = get.first().username)
-                    db.add(admin_table)
-                    db.commit()
-                    db.refresh(admin_table)
-                    print(admin_table)
-                    return {"status":"admin created"}
-                else:
-                    return {"status":f"{user.name} change to Admin"}
-            return {"status":f"{user.name} change to User"}
-        else :
-            return {"status":"user not found"}
-    except Exception as error:
-        print(error)
-        return {"status":"something wrong"}
+def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db) , current_user = Depends(auth.current_user)):
+    role = current_user.role
+    if role ==2:
+        try:
+            get = db.query(model.user).filter(model.user.username == data.username)
+            if get.first():
+                user = get.first()
+                get.update(data.dict(), synchronize_session=False)
+                db.commit()
+                if data.role == 1:
+                    check = db.query(model.schoolProfile).filter(model.schoolProfile.user_id == get.first().id).first()
+                    if not check:
+                        admin_table = model.schoolProfile(user_id = get.first().id , username = get.first().username)
+                        db.add(admin_table)
+                        db.commit()
+                        db.refresh(admin_table)
+                        print(admin_table)
+                        response.status_code =status.HTTP_201_CREATED
+                        return {"status":"admin created"}
+                    else:
+                        response.status_code = status.HTTP_200_OK
+                        return {"status":f"{user.name} change to Admin"}
+                response.status_code = status.HTTP_200_OK
+                return {"status":f"{user.name} change to User"}
+            else :
+                response.status_code = status.HTTP_404_NOT_FOUND
+                return {"status":"user not found"}
+        except Exception as error:
+            print(error)
+            raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED , detail="Something went wrong!")
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="Unauthorized operation")    
