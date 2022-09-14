@@ -4,6 +4,18 @@ on: [push , pull_request]
 
 jobs:
   built:
+    environment:
+      name: Test_API
+    env:
+        DB_HOST: ${{DB_HOST}}
+        DB_PORT: ${{DB_PORT}}
+        DB_USERNAME: ${{DB_USERNAME}}
+        DB_PASSWORD: ${{DB_PASSWORD}}
+        DB_NAME: ${{DB_NAME}}
+        SECRET_KEY: ${{SECRET_KEY}}
+        ALGORITHM: ${{ALGORITHM}}
+        TOKEN_EXPIRATION: ${{TOKEN_EXPIRATION}}
+
     runs-on: windows-latest
     steps:
       - name: pull from git
