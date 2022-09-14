@@ -40,6 +40,8 @@ jobs:
           database: ${{secrets.DB_NAME}}
           port: ${{secrets.DB_PORT}}
         id: postgres
+        env:
+          DATABASE_URI: ${{ steps.postgres.outputs.connection-uri }}
       - name: pull from git
         uses: actions/checkout@v2
       - name: Install python
