@@ -11,7 +11,7 @@ jobs:
         DB_PORT: ${{secrets.DB_PORT}}
         DB_USERNAME: ${{secrets.DB_USERNAME}}
         DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-        DB_NAME: school_test
+        DB_NAME: ${{secrets.DB_NAME}}
         SECRET_KEY: ${{secrets.SECRET_KEY}}
         ALGORITHM: ${{secrets.ALGORITHM}}
         TOKEN_EXPIRATION: ${{secrets.TOKEN_EXPIRATION}}
@@ -37,7 +37,7 @@ jobs:
         with:
           username: ${{secrets.DB_USERNAME}}
           password: ${{secrets.DB_PASSWORD}}
-          database: school_test
+          database: ${{secrets.DB_NAME}}
           port: ${{secrets.DB_PORT}}
         id: postgres
       - name: pull from git
