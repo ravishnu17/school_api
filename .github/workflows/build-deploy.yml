@@ -11,7 +11,7 @@ jobs:
         DB_PORT: ${{secrets.DB_PORT}}
         DB_USERNAME: ${{secrets.DB_USERNAME}}
         DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-        DB_NAME: ${{secrets.DB_NAME}}
+        DB_NAME: ${{secrets.DB_NAME}}_test
         SECRET_KEY: ${{secrets.SECRET_KEY}}
         ALGORITHM: ${{secrets.ALGORITHM}}
         TOKEN_EXPIRATION: ${{secrets.TOKEN_EXPIRATION}}
@@ -37,7 +37,7 @@ jobs:
         with:
           username: ${{secrets.DB_USERNAME}}
           password: ${{secrets.DB_PASSWORD}}
-          database: ${{secrets.DB_NAME}}
+          database: ${{secrets.DB_NAME}}_test
           port: ${{secrets.DB_PORT}}
         id: postgres
       - name: pull from git
@@ -52,5 +52,6 @@ jobs:
         run: pip install -r requirements.txt  
       - name: Test with pytest
         run: |
-          pip install pytest
+          pip install pytest,alembic
+          alembic upgrade head
           pytest -v -s     
