@@ -6,13 +6,5 @@ jobs:
   built:
     runs-on: windows
     steps:
-      - name: pull from git
-        uses: actions/checkout@v2
-      - name: Install python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.10"
-      - name: Update pip
-        run: python -m pip install --upgrade pip
-      - name: Install dependencies
-        run: pip install -r requirements.txt        
+      - name: test
+        uses: pytest -v -s      
