@@ -41,17 +41,18 @@ def Client():
 #create test user    
 @pytest.fixture
 def TestUser(Client):
-    userData={"name":"Ravishnu","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"ravi@gmail.com","username":"Ravishnu","password":encrypt.hash("Ravishnu"),"district":"Krishnagiri"}
+    userData={"name":"Ravishnu","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"ravi@gmail.com","username":"Ravishnu","password":"Ravishnu","district":"Krishnagiri"}
     res = Client.post('/register',json=userData)
     user = res.json()
+    user['password'] = userData['password']
     return user
 
 @pytest.fixture
 def TestUser2(Client):
     userData={"name":"Muni","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"muni@gmail.com","username":"Muni","password":"Muni","district":"Krishnagiri"}
-    userData['password']=encrypt.hash(userData['password'])
     res = Client.post('/register',json=userData)
     user = res.json()
+    user['password'] = userData['password']
     return user
 
 @pytest.fixture

@@ -14,7 +14,7 @@ class registers(BaseModel):
     email:EmailStr
     username:str
     password:str
-    role:int=0
+    role:Optional[int]=0
     district:str    
     class Config:
         orm_mode=True

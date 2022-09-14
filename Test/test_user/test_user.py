@@ -1,6 +1,6 @@
 import json
 import pytest
-from fastapi.testclient import TestClient
+# from fastapi.testclient import TestClient
 from control.main import root
 from schema import schema
 from auth import encrypt
@@ -13,8 +13,8 @@ def test_root(Client):
     
 def test_register(Client ):
     res=Client.post("/register",json = {"name":"Ravishnu","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"ravi@gmail.com","username":"ravi","password":"Ravishnu","district":"Krishnagiri"})
-    data = schema.responses(**res.json())
-    assert data.email == "ravi@gmail.com"
+    print(res.json()['name'])
+    assert res.json()['email'] == "ravi@gmail.com"
     assert res.status_code == 201    
  
 @pytest.mark.parametrize("username , email , status",[("Ravishnu","ravi12@gmail.com",409),("ravi","ravi@gmail.com",409)])
@@ -26,7 +26,6 @@ def test_invalid_register(Client ,TestUser, username ,email,status):
     
 def test_login(Client , TestUser):
     res = Client.post("/login",data={"username":TestUser['username'],"password":TestUser['password']})
-    print(res.json())
     assert res.json()['token_type'] == "bearer"
     assert res.status_code == 200  
 
@@ -66,20 +65,16 @@ def test_update_currentUserData(AuthClient ,TestUser ,  TestUser2 , username ,em
     data ={"name":"Muni","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":email,"username":username,"password":"Muni","district":"Krishnagiri"}
     data['password'] = encrypt.hash(data['password'])
     res = AuthClient.post("/profileUpdate" , json=data)   
-    print(res.json()['msg'])
+    print(res.json()['detail'])
     assert res.status_code == status
     
 def test_deleteUser(AuthClient):
         res = AuthClient.delete("/delete")
         print(res.json()['detail'])
-        assert res.status_code ==204
+        assert res.status_code ==200
         
 @pytest.mark.parametrize("old,new,status",[('Muni','Muniraj',202),('muni','muni',406),('muni','Muniraj',403)])
 def test_changePassword(AuthClient,TestUser2 ,old, new ,status):
-    res = AuthClient.get("/get")
-    print(res.json())
-    ch = encrypt.check('Muni',TestUser2['password'])
-    print(ch)
     res = AuthClient.post('/pwd',json={"oldPwd":old,"newPwd":new})
     print(res.json()['msg'])
     assert res.status_code == status        

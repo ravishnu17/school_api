@@ -73,37 +73,35 @@ def profile(db:Session=Depends(db.get_db) , current_user = Depends(auth.current_
 
 #update user detail
 @root.post('/profileUpdate')
-def update(data:schema.updates,response:Response ,db:Session=Depends(db.get_db),current_user = Depends(auth.current_user)):
+def update(data:schema.updates,db:Session=Depends(db.get_db),current_user = Depends(auth.current_user)):
     all=db.query(model.user).filter(model.user.id == current_user.id).first()
     if all.email != data.email: 
         user=db.query(model.user).filter(model.user.email != all.email).all()
         for val in user:
             if data.email == val.email:
-                response.status_code = status.HTTP_409_CONFLICT
-                return {"msg":"This mail id already registered"}         
-    elif all.username != data.username:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Already registered with this mail ID")        
+    
+    if all.username != data.username:
         user=db.query(model.user).filter(model.user.username != all.username).all()
         for val in user:
             if data.username == val.username:
-                response.status_code = status.HTTP_409_CONFLICT
-                return {"msg":"Try with another username"}
-    old_data=db.query(model.user).filter(model.user.id == current_user.id)
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Username Already taken ! Try another") 
     
+    old_data=db.query(model.user).filter(model.user.id == current_user.id)
     if old_data.first():
         old_data.update(data.dict(),synchronize_session=False)
         db.commit()
         data = old_data.first()
-        return {"data":data , "msg":"updated"}
+        return {"data":data , "detail":"updated"}
     
  #delete user   
 @root.delete("/delete")
-def delete(response : Response, db : Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
+def delete( db : Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
         old_data = db.query(model.user).filter(model.user.id == current_user.id)
         if not old_data.first():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="User not found")
         old_data.delete(synchronize_session=False)
         db.commit()
-        response.status_code=status.HTTP_204_NO_CONTENT
         return {"detail":"deleted successfully"}
         
 #change password    
@@ -123,35 +121,56 @@ def pwdchg(password : schema.pwds , response :Response , db:Session=Depends(db.g
         db.commit()
         response.status_code=status.HTTP_202_ACCEPTED
         return {"status":1 , "msg":"password changed"}
-    
+
+global key
+key= []   
 #generate pin
 @root.post('/pinGenerate')
 def Generate(data:dict, db:Session=Depends(db.get_db)):
     get = db.query(model.user).filter(model.user.username ==data['username']).first()
     if not get:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Username not exists")
-    global pin
+    
     pin=random.randint(123456,999999)
-    print(pin)
-    return {"pin":pin}    
+    name=-1
+    if key !=[]:
+        for i in range(key.index(key[-1])+1):
+            if key[i]['username'] == data['username']:
+                name=i
+                
+        if name !=-1:
+            key[name]['pin']=pin
+        else:
+            val={"username":get.username,"pin":pin}
+            key.append(val)      
+    else:
+        val={"username":get.username,"pin":pin}
+        key.append(val)
+                
+    return key   
     
 #forgot password
 @root.post('/forgotPwd')
 def forgotPwd(data:schema.ForgotPwd ,db:Session=Depends(db.get_db)):
-        try:
-            print(pin)
-        except:    
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Refresh the page !")
-        
-        if data.pin != pin:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Invalid pin")
-        find = db.query(model.user).filter(model.user.username == data.username)
-        if not find.first():
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Username not exists ,Please Register")
-        enPwd = encrypt.hash(data.pwd)
-        find.update({"password" : enPwd } , synchronize_session=False)
-        db.commit()
-        return {"status":"successfully changed"}
+    find = db.query(model.user).filter(model.user.username == data.username)
+    if not find.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Username not exists ,Please Register")       
+    
+    try:
+        for i in range(key.index(key[-1])+1):
+            if data.username == key[i]['username']:
+                pin =key[i]['pin']
+                
+    except:    
+        raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT,detail="Refresh the page !")
+ 
+    if data.pin != pin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Invalid pin")
+    
+    enPwd = encrypt.hash(data.pwd)
+    find.update({"password" : enPwd } , synchronize_session=False)
+    db.commit()
+    return {"status":"successfully changed"}
             
 
 #change Role:
