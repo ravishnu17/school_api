@@ -34,12 +34,12 @@ jobs:
     steps:
       - name: setup postgres
         uses: ikalnytskyi/action-setup-postgres@v3
-          with:
-            username: ${{secrets.DB_USERNAME}}
-            password: ${{secrets.DB_PASSWORD}}
-            database: ${{secrets.DB_NAME}}_test
-            port: ${{secrets.DB_PORT}}
-          id: postgres
+        with:
+          username: ${{secrets.DB_USERNAME}}
+          password: ${{secrets.DB_PASSWORD}}
+          database: ${{secrets.DB_NAME}}_test
+          port: ${{secrets.DB_PORT}}
+        id: postgres
       - name: pull from git
         uses: actions/checkout@v2
       - name: Install python
