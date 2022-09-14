@@ -7,4 +7,4 @@ jobs:
     runs-on: windows
     steps:
       - name: test
-        uses: pytest -v -s      
+        run: pytest -v -s      
