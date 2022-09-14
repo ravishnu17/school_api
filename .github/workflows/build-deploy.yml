@@ -4,17 +4,17 @@ on: [push , pull_request]
 
 jobs:
   built:
-    environment:
-      name: Test_API
-    env:
-        DB_HOST: ${{secrets.DB_HOST}}
-        DB_PORT: ${{secrets.DB_PORT}}
-        DB_USERNAME: ${{secrets.DB_USERNAME}}
-        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-        DB_NAME: ${{secrets.DB_NAME}}
-        SECRET_KEY: ${{secrets.SECRET_KEY}}
-        ALGORITHM: ${{secrets.ALGORITHM}}
-        TOKEN_EXPIRATION: ${{secrets.TOKEN_EXPIRATION}}
+    # environment:
+    #   name: Test_API
+    # env:
+    #     DB_HOST: localhost
+    #     DB_PORT: 5432
+    #     DB_USERNAME: school
+    #     DB_PASSWORD: school
+    #     DB_NAME: school_test
+    #     SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
+    #     ALGORITHM: HS256
+    #     TOKEN_EXPIRATION: 60
 
     # services:
     #   postgresql-x64-14:
@@ -35,10 +35,10 @@ jobs:
       - name: setup postgres
         uses: ikalnytskyi/action-setup-postgres@v3
         with:
-          username: ${{secrets.DB_USERNAME}}
-          password: ${{secrets.DB_PASSWORD}}
-          database: ${{secrets.DB_NAME}}
-          port: ${{secrets.DB_PORT}}
+          username: school
+          password: school
+          database: school_test
+          port: 5432
         id: postgres
         env:
           DATABASE_URI: ${{ steps.postgres.outputs.connection-uri }}
