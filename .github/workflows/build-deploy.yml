@@ -17,8 +17,8 @@ jobs:
         TOKEN_EXPIRATION: ${{secrets.TOKEN_EXPIRATION}}
 
     services:
-      postgres:
-        image: postgres
+      postgresql-x64-14:
+        # image: postgres
         env:
           POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
           POSTGRES_DB: ${{secrets.DB_NAME}}_test
