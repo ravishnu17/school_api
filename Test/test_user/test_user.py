@@ -74,7 +74,7 @@ def test_deleteUser(AuthClient):
         assert res.status_code ==200
         
 @pytest.mark.parametrize("old,new,status",[('Muni','Muniraj',202),('muni','muni',406),('muni','Muniraj',403)])
-def test_changePassword(AuthClient,TestUser2 ,old, new ,status):
+def test_changePassword(AuthClient,TestUser2 ,old, new ,status):    
     res = AuthClient.post('/pwd',json={"oldPwd":old,"newPwd":new})
     print(res.json()['msg'])
     assert res.status_code == status        

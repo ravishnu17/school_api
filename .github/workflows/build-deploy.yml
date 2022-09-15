@@ -7,21 +7,21 @@ jobs:
     environment:
       name: Test_API
     env:
-        DB_HOST: ${{secrets.DB_HOST}}
-        DB_PORT: ${{secrets.DB_PORT}}
-        DB_USERNAME: ${{secrets.DB_USERNAME}}
-        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-        DB_NAME: ${{secrets.DB_NAME}}
-        SECRET_KEY: ${{secrets.SECRET_KEY}}
-        ALGORITHM: ${{secrets.ALGORITHM}}
-        TOKEN_EXPIRATION: ${{secrets.TOKEN_EXPIRATION}}
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USERNAME: school
+        DB_PASSWORD: school
+        DB_NAME: school
+        SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
+        ALGORITHM: HS256
+        TOKEN_EXPIRATION: 60
 
     services:
       postgresql-x64-14:
         image: postgres
         env:
-          POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
-          POSTGRES_DB: ${{secrets.DB_NAME}}
+          POSTGRES_PASSWORD: school
+          POSTGRES_DB: shool_test
         ports:
         - 5432:5432
         options: >-
