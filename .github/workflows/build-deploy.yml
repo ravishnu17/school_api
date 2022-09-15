@@ -4,31 +4,15 @@ on: [push , pull_request]
 
 jobs:
   built:
-    # environment:
-    #   name: Test_API
     env:
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_USERNAME: school
-        DB_PASSWORD: school
-        DB_NAME: school
-        SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
-        ALGORITHM: HS256
-        TOKEN_EXPIRATION: 60
-
-    # services:
-    #   postgresql:
-    #     image: postgres
-    #     env:
-    #       POSTGRES_PASSWORD: school
-    #       POSTGRES_DB: school
-    #     ports:
-    #     - 5432:5432
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: school
+      DB_PASSWORD: school
+      DB_NAME: school
+      SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
+      ALGORITHM: HS256
+      TOKEN_EXPIRATION: 60
 
     runs-on: ubuntu-latest
     container: node:10.18-jessie
