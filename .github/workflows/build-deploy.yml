@@ -51,4 +51,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt  
       - name: Test with pytest
-        run: python --version
+        run: |
+          alembic heads
+
