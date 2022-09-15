@@ -40,8 +40,6 @@ jobs:
       #     database: ${{secrets.DB_NAME}}
       #     port: ${{secrets.DB_PORT}}
       #   id: postgres
-      - name: print env
-        run: echo ${{secrets.DB_PASSWORD}}
       - name: pull from git
         uses: actions/checkout@v2
       - name: Install python
@@ -55,4 +53,4 @@ jobs:
       - name: Test with pytest
         run: |
           alembic upgrade head
-          pytest -v -s     
+          alembic heads     
