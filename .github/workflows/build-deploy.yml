@@ -3,7 +3,7 @@ name: Build and deploy
 on: [push , pull_request]
 
 jobs:
-  built:
+  # built:
     # environment:
     #   name: Test_API
     env:
@@ -17,7 +17,7 @@ jobs:
         TOKEN_EXPIRATION: 60
 
     # services:
-    #   postgresql-x64-14:
+    #   postgresql:
     #     image: postgres
     #     env:
     #       POSTGRES_PASSWORD: school
@@ -31,6 +31,21 @@ jobs:
     #       --health-retries 5
 
     runs-on: ubuntu-latest
+    container: node:10.18-jessie
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       # - name: setup postgres
       #   uses: ikalnytskyi/action-setup-postgres@v3
