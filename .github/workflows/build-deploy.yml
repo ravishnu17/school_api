@@ -48,7 +48,7 @@ jobs:
         with:
           username: ${{secrets.DB_USERNAME}}
           password: ${{secrets.DB_PASSWORD}}
-          database: ${{secrets.DB_NAME}}
+          database: ${{secrets.DB_NAME}}_test
           port: ${{secrets.DB_PORT}}
         id: postgres
 
