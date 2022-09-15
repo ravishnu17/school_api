@@ -79,7 +79,6 @@ jobs:
           builder: ${{steps.buildx.outputs.name}}
           push: true
           tags: ${{secrets.DOCKER_HUB_USERNAME}}/school_fast_api:fastapiImage
-          cache-from: type=local, src=/temp/.buildx-cache
-          cache-to: type=local, dest=/temp/.buildx-cache
+          
       - name: Image digest
         run: echo ${{steps.docker_build.outputs.digest}}         
