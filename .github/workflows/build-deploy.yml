@@ -53,6 +53,5 @@ jobs:
         run: pip install -r requirements.txt  
       - name: Test with pytest
         run: |
-          alembic heads
           alembic upgrade heads
 
