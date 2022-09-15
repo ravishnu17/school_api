@@ -30,7 +30,7 @@ jobs:
     #       --health-timeout 5s
     #       --health-retries 5
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: pull from git
         uses: actions/checkout@v2
@@ -85,7 +85,7 @@ jobs:
       #   run: echo ${{steps.docker_build.outputs.digest}}         
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [built]
     
     environment:
