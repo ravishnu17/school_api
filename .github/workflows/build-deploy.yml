@@ -4,31 +4,31 @@ on: [push , pull_request]
 
 jobs:
   built:
-    environment:
-      name: Test_API
-    env:
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_USERNAME: school
-        DB_PASSWORD: school
-        DB_NAME: school
-        SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
-        ALGORITHM: HS256
-        TOKEN_EXPIRATION: 60
+    # environment:
+    #   name: Test_API
+    # env:
+    #     DB_HOST: localhost
+    #     DB_PORT: 5432
+    #     DB_USERNAME: school
+    #     DB_PASSWORD: school
+    #     DB_NAME: school
+    #     SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
+    #     ALGORITHM: HS256
+    #     TOKEN_EXPIRATION: 60
 
-    services:
-      postgresql-x64-14:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: school
-          POSTGRES_DB: school
-        ports:
-        - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # services:
+    #   postgresql-x64-14:
+    #     image: postgres
+    #     env:
+    #       POSTGRES_PASSWORD: school
+    #       POSTGRES_DB: school
+    #     ports:
+    #     - 5432:5432
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
 
     runs-on: ubuntu-latest
     steps:
@@ -52,5 +52,5 @@ jobs:
         run: pip install -r requirements.txt  
       - name: Test with pytest
         run: |
-          alembic upgrade head
+          pytest -v
 
