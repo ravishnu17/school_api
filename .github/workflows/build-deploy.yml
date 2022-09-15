@@ -45,4 +45,4 @@ jobs:
       - name: Test with pytest
         run: |
           alembic upgrade head
-          pytest
+          pytest -v -s
