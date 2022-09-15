@@ -79,6 +79,22 @@ jobs:
           builder: ${{steps.buildx.outputs.name}}
           push: true
           tags: ${{secrets.DOCKER_HUB_USERNAME}}/school_fast_api:fastapiImage
-
+          cache-from: type=local, src=/temp/.buildx-cache
+          cache-to: type=local, dest=/temp/.buildx-cache
       - name: Image digest
         run: echo ${{steps.docker_build.outputs.digest}}         
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment:
+      name: api-school
+    steps:
+      - name: pulling git repo
+        uses: actions/checkout@v2
+      - name: deploy on heroku
+      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP}} #Must be unique in Heroku
+          heroku_email: ${{secrets.HEROKU_MAIL}}
