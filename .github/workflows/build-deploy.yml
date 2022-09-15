@@ -6,15 +6,15 @@ jobs:
   built:
     # environment:
     #   name: Test_API
-    # env:
-    #     DB_HOST: localhost
-    #     DB_PORT: 5432
-    #     DB_USERNAME: school
-    #     DB_PASSWORD: school
-    #     DB_NAME: school
-    #     SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
-    #     ALGORITHM: HS256
-    #     TOKEN_EXPIRATION: 60
+    env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USERNAME: school
+        DB_PASSWORD: school
+        DB_NAME: school
+        SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
+        ALGORITHM: HS256
+        TOKEN_EXPIRATION: 60
 
     # services:
     #   postgresql-x64-14:
