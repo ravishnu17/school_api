@@ -43,6 +43,7 @@ jobs:
       - name: pull from git
         uses: actions/checkout@v2
       - name: Install python
+      alembic upgrade heads
         uses: actions/setup-python@v2
         with:
           python-version: "3.10"
@@ -53,4 +54,5 @@ jobs:
       - name: Test with pytest
         run: |
           alembic heads
+          alembic upgrade heads
 
