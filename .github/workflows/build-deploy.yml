@@ -4,22 +4,24 @@ on: [push , pull_request]
 
 jobs:
   built:
+    environment:
+      name: school
     env:
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_USERNAME: school
-        DB_PASSWORD: school
-        DB_NAME: school
-        SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
-        ALGORITHM: HS256
-        TOKEN_EXPIRATION: 60
+        DB_HOST: ${{secrets.DB_HOST}}
+        DB_PORT: ${{secrets.DB_PORT}}
+        DB_USERNAME: ${{secrets.DB_USERNAME}}
+        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+        DB_NAME: ${{secrets.DB_NAME}}
+        SECRET_KEY: ${{secrets.SECRER_KEY}}
+        ALGORITHM: ${{secrets.ALGORITHM}}
+        TOKEN_EXPIRATION: ${{secrets.TOKEN_EXPIRATION}}
 
     services:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: school
-          POSTGRES_DB: school
+          POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
+          POSTGRES_DB: ${{secrets.DB_NAME}}_test
         ports:
         - 5432:5432
         options: >-
