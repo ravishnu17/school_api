@@ -86,7 +86,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-
+    needs: [built]
+    
     environment:
       name: api-school
 
