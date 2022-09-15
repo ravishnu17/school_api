@@ -4,6 +4,16 @@ on: [push , pull_request]
 
 jobs:
   built:
+    env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USERNAME: school
+        DB_PASSWORD: school
+        DB_NAME: school
+        SECRET_KEY: ydew78d8uwed9wejd9wed9weidjwiojduiwedt7wediwkdnowejd9owe
+        ALGORITHM: HS256
+        TOKEN_EXPIRATION: 60
+
     runs-on: ubuntu-latest
     steps:
       - name: pull from git
