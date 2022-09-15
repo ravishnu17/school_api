@@ -3,7 +3,7 @@ name: Build and deploy
 on: [push , pull_request]
 
 jobs:
-  # built:
+  built:
     # environment:
     #   name: Test_API
     env:
