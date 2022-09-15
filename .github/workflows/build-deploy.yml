@@ -21,7 +21,7 @@ jobs:
         image: postgres
         env:
           POSTGRES_PASSWORD: school
-          POSTGRES_DB: shool
+          POSTGRES_DB: school
         ports:
         - 5432:5432
         options: >-
