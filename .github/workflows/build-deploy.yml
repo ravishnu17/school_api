@@ -15,6 +15,10 @@ jobs:
         SECRET_KEY: ${{secrets.SECRER_KEY}}
         ALGORITHM: ${{secrets.ALGORITHM}}
         TOKEN_EXPIRATION: ${{secrets.TOKEN_EXPIRATION}}
+        ADMINUSER: ${{secrets.ADMINUSER}}
+        PASSWORD: ${{secrets.PASSWORD}}
+        ROLE: ${{secrets.ROLE}}
+        EMAIL: ${{secrets.EMAIL}}
 
     services:
       postgres:

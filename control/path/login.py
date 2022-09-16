@@ -7,7 +7,7 @@ from dbconnect import db
 from schema import schema
 from auth import auth, encrypt
 from model import model
-
+from config.config import setting
 root = APIRouter(
     tags=['User']
 )
@@ -58,8 +58,8 @@ def check(db:Session=Depends(db.get_db) ,current_user = Depends(auth.current_use
 @root.get('/getUser')
 def getUser(response:Response , db:Session = Depends(db.get_db), current_user = Depends(auth.current_user)):
     check = db.query(model.user).filter(model.user.id == current_user.id , model.user.role == current_user.role).first()
-    if check.role ==2 :
-       user = db.query(model.user.username,model.user.name,model.user.role).filter(model.user.name !="ADMIN").all()
+    if check.role ==setting.role and current_user.role == setting.role :
+       user = db.query(model.user.username,model.user.name,model.user.role).filter(model.user.name !="core" , model.user.role != current_user.role).all()
     else :
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"detail":"You are not admin"}   
