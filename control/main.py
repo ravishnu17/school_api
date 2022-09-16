@@ -8,7 +8,6 @@ from auth import encrypt
 from config.config import setting
 
 # model.Base.metadata.create_all(bind=db.engine)
-
 query = select(model.user.username).where(model.user.username == setting.adminuser)
 with db.engine.connect() as connect:
     data = None
