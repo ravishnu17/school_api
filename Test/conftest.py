@@ -28,8 +28,8 @@ session_test = sessionmaker(autocommit=False , autoflush= False , bind=engine)
 #setup test db
 @pytest.fixture
 def Client(): 
-    model.Base.metadata.drop_all(bind=engine)
-    model.Base.metadata.create_all(bind=engine)
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     db=session_test()       
     def getTest_db():
         try:
