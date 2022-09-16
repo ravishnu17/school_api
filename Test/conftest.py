@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from dbconnect.db import get_db,Base
 from auth.auth import create_token
 from auth import encrypt
+from model import model
 
 
 sql_url = f"postgresql://{setting.db_username}:{setting.db_password}@{setting.db_host}:{setting.db_port}/{setting.db_name}_test"
@@ -27,8 +28,8 @@ session_test = sessionmaker(autocommit=False , autoflush= False , bind=engine)
 #setup test db
 @pytest.fixture
 def Client(): 
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    model.Base.metadata.drop_all(bind=engine)
+    model.Base.metadata.create_all(bind=engine)
     db=session_test()       
     def getTest_db():
         try:
