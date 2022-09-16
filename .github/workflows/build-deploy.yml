@@ -11,24 +11,24 @@ jobs:
         DB_PORT: ${{secrets.DB_PORT}}
         DB_USERNAME: ${{secrets.DB_USERNAME}}
         DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-        DB_NAME: ${{secrets.DB_NAME}}
+        DB_NAME: ${{secrets.DB_NAME}}_test
         SECRET_KEY: ${{secrets.SECRER_KEY}}
         ALGORITHM: ${{secrets.ALGORITHM}}
         TOKEN_EXPIRATION: ${{secrets.TOKEN_EXPIRATION}}
 
-    # services:
-    #   postgres:
-    #     image: postgres
-    #     env:
-    #       POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
-    #       POSTGRES_DB: ${{secrets.DB_NAME}}_test
-    #     ports:
-    #     - 5432:5432
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
+          POSTGRES_DB: ${{secrets.DB_NAME}}_test
+        ports:
+        - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     runs-on: windows-latest
     steps:
@@ -46,45 +46,46 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt 
 
-      - name: set postgres
-        uses: ikalnytskyi/action-setup-postgres@v3
-        with:
-          username: ${{secrets.DB_USERNAME}}
-          password: ${{secrets.DB_PASSWORD}}
-          database: ${{secrets.DB_NAME}}_test
-          port: ${{secrets.DB_PORT}}
-        id: postgres
+      # - name: set postgres
+      #   uses: ikalnytskyi/action-setup-postgres@v3
+      #   with:
+      #     username: ${{secrets.DB_USERNAME}}
+      #     password: ${{secrets.DB_PASSWORD}}
+      #     database: ${{secrets.DB_NAME}}_test
+      #     port: ${{secrets.DB_PORT}}
+      #   id: postgres
 
       - name: Test with pytest
         run: |
+          alembic upgrade head
           pytest -v -s
 
-      # - name: login to docker
-      #   uses: docker/login-action@v1
-      #   with:
-      #     username: ${{secrets.DOCKER_HUB_USERNAME}}
-      #     password: ${{secrets.DOCKER_HUB_TOKEN}}
+      - name: login to docker
+        uses: docker/login-action@v1
+        with:
+          username: ${{secrets.DOCKER_HUB_USERNAME}}
+          password: ${{secrets.DOCKER_HUB_TOKEN}}
 
-      # - name: setup docker buildx
-      #   id: buildx
-      #   uses: docker/setup-buildx-action@v1
+      - name: setup docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
 
-      # - name: push and build
-      #   id: docker-build
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: ./
-      #     file: ./Dockerfile
-      #     builder: ${{steps.buildx.outputs.name}}
-      #     push: true
-      #     tags: ${{secrets.DOCKER_HUB_USERNAME}}/school_fast_api:fastapiImage
-      #     cache-from: type=local, src=/temp/.buildx-cache
-      #     cache-to: type=local, dest=/temp/.buildx-cache
-      # - name: Image digest
-      #   run: echo ${{steps.docker_build.outputs.digest}}         
+      - name: push and build
+        id: docker-build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          builder: ${{steps.buildx.outputs.name}}
+          push: true
+          tags: ${{secrets.DOCKER_HUB_USERNAME}}/school_fast_api:fastapiImage
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/school_fast_api:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/school_fast_api:buildcache,mode=max
+      - name: Image digest
+        run: echo ${{steps.docker_build.outputs.digest}}         
 
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: [built]
     
     environment:
@@ -94,8 +95,8 @@ jobs:
       - name: pulling git repo
         uses: actions/checkout@v2
       - name: deploy on heroku
-        uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        uses: akhileshns/heroku-deploy@v3.12.12 
         with:
           heroku_api_key: ${{secrets.HEROKU_KEY}}
-          heroku_app_name: ${{secrets.HEROKU_APP}} #Must be unique in Heroku
+          heroku_app_name: ${{secrets.HEROKU_APP}}
           heroku_email: ${{secrets.HEROKU_MAIL}}
