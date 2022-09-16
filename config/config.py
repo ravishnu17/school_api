@@ -9,6 +9,10 @@ class Setting(BaseSettings):
     secret_key :str
     algorithm:str
     token_expiration:int
+    adminuser:str
+    password:str
+    role:int
+    email:str
     class Config:
         env_file='.env'
         

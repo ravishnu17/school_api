@@ -5,17 +5,19 @@ from model import model
 from dbconnect import db
 from sqlalchemy import select , insert
 from auth import encrypt
+from config.config import setting
 
-model.Base.metadata.create_all(bind=db.engine)
+# model.Base.metadata.create_all(bind=db.engine)
+print(setting.adminuser)
 
-query = select(model.user.username).where(model.user.username == "ADMIN@ADMIN")
+query = select(model.user.username).where(model.user.username == setting.adminuser)
 with db.engine.connect() as connect:
     data = None
     for row in connect.execute(query):
         data=row
         print(row)
     if not data:
-        connect.execute(insert(model.user),{"name":"ADMIN","gender":"male","dob":"2002-07-17","mobile":1234567890,"email":"admin@admin.com","username":"ADMIN@ADMIN","password":encrypt.hash("ADMIN@ADMIN"),"role":2,"district":"krishnagiri"})
+        connect.execute(insert(model.user),{"name":"core","gender":"male","dob":"2002-07-17","mobile":1234567890,"email":setting.email,"username":setting.adminuser,"password":encrypt.hash(setting.password),"role":setting.role,"district":"krishnagiri"})
         
 root=FastAPI()
 
