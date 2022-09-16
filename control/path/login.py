@@ -207,3 +207,8 @@ def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db)
             raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED , detail="Something went wrong!")
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="Unauthorized operation")    
+    
+@root.post('/test')
+def check(data:dict):
+    print(data)    
+    return data

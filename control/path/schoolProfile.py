@@ -12,22 +12,22 @@ root=APIRouter(
     tags=['School Profile']
 )
 
-def getDynamic(data):
+# def getDynamic(data):
     # if index==0:
     #     keys=["scholarshipName","scholarshipBoys","scholarshipGirls","Govtscholarship","Pvtscholarship"]
     # elif index==1:
     #     keys=["shiftName","shiftFromDate","shiftToDate","shiftFromTime","shiftToTime","shiftRemark"]
     # elif index ==2:
     #     keys = ["className","classSection","classBoys","classGirls","classStudent"] 
-    keys=['id','text']
-    get={}
-    set=[]
-    for list in data:
-        for i in range(list.index(list[-1])+1):
-            get.update({keys[i]:list[i]})
-        set.append(get)
-        get={}   
-    return set
+    # keys=['id','text']
+    # get={}
+    # set=[]
+    # for list in data:
+    #     for i in range(list.index(list[-1])+1):
+    #         get.update({keys[i]:list[i]})
+    #     set.append(get)
+    #     get={}   
+    # return set
 
       
 #get school profile details    
@@ -67,11 +67,9 @@ def UpdateSchool(data : dict , db:Session=Depends(db.get_db) ,  current_user = D
     if data.get('schoolClass'):
         data['schoolClass']=setDynamic(data['schoolClass'])
     if data.get('level'):
-        data['level']=setDynamic(data['level'])
-        print(data['level'])   
+        data['level']=setDynamic(data['level'])  
     if data.get('medium'):
-        data['medium']=setDynamic(data['medium'])
-        print(data['medium'])        
+        data['medium']=setDynamic(data['medium'])        
     try:
         if get.first():
             get.update(data,synchronize_session=False)
