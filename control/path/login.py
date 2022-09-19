@@ -46,7 +46,7 @@ def login(data:OAuth2PasswordRequestForm = Depends() ,db:Session=Depends(db.get_
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Sign up!")        
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")        
     
 #test api for get current user
 @root.get('/get')
