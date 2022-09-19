@@ -59,10 +59,10 @@ def check(db:Session=Depends(db.get_db) ,current_user = Depends(auth.current_use
 def getUser(response:Response , db:Session = Depends(db.get_db), current_user = Depends(auth.current_user)):
     check = db.query(model.user).filter(model.user.id == current_user.id , model.user.role == current_user.role).first()
     if check.role ==setting.role and current_user.role == setting.role :
-       user = db.query(model.user.username,model.user.name,model.user.role).filter(model.user.name !="core" , model.user.role != current_user.role).all()
+       user = db.query(model.user.id, model.user.username,model.user.name,model.user.role).filter(model.user.name !="core" , model.user.role != current_user.role).all()
     else :
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"detail":"You are not admin"}   
+        return {"detail":"You are not admin"} 
     return user
 
 #get detail by id
@@ -104,6 +104,18 @@ def delete( db : Session = Depends(db.get_db) , current_user = Depends(auth.curr
         db.commit()
         return {"detail":"deleted successfully"}
         
+@root.delete("/deleteID/{id}")
+def delete(id, db : Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
+        owner = db.query(model.user).filter(model.user.id == current_user.id).first()
+        if owner.role == setting.role and current_user.role == setting.role:
+            data = db.query(model.user).filter(model.user.id == id)
+            if not data.first():
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="User not found")
+            data.delete(synchronize_session=False)
+            db.commit()
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Not allowed to delete")    
+        return {"detail":"deleted successfully"}
 #change password    
 @root.post('/pwd')
 def pwdchg(password : schema.pwds , response :Response , db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
