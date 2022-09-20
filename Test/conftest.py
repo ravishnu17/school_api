@@ -40,6 +40,22 @@ def Client():
     root.dependency_overrides[get_db]=getTest_db
     yield TestClient(root)
     
+
+#create test Admin
+@pytest.fixture
+def TestAdmin(Client):    
+    userData={"name":"ADMIN","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"admin@gmail.com","username":"ADMIN@ADMIN","password":encrypt.hash("ADMIN@ADMIN"),"role":2,"district":"Krishnagiri"}
+    res = Client.post('/register',json=userData)
+    user = res.json()
+    
+    token = create_token(data={'id':user['id'],"role":user['role'],"name":user['name']})
+    return token
+
+@pytest.fixture
+def AdminClient(Client , TestAdmin):
+    Client.headers = {**Client.headers , "Authorization":f"bearer {TestAdmin}"}
+    return Client    
+    
 #create test user    
 @pytest.fixture
 def TestUser(Client):
@@ -51,7 +67,7 @@ def TestUser(Client):
 
 @pytest.fixture
 def TestUser2(Client):
-    userData={"name":"Muni","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"muni@gmail.com","username":"Muni","password":"Muni",'role':1,"district":"Krishnagiri"}
+    userData={"name":"Muni","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"muni@gmail.com","username":"Muni","password":"Muni","district":"Krishnagiri"}
     res = Client.post('/register',json=userData)
     user = res.json()
     user['password'] = userData['password']
@@ -67,23 +83,18 @@ def AuthClient(Client , Token):
     return Client
 
 
-#create test Admin
-@pytest.fixture
-def TestAdmin(Client):    
-    userData={"name":"ADMIN","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"admin@gmail.com","username":"ADMIN@ADMIN","password":encrypt.hash("ADMIN@ADMIN"),"role":2,"district":"Krishnagiri"}
-    res = Client.post('/register',json=userData)
-    user = res.json()
-    
-    token = create_token(data={'id':user['id'],"role":user['role'],"name":user['name']})
-    return token
-
-@pytest.fixture
-def AdminClient(Client , TestAdmin):
-    Client.headers = {**Client.headers , "Authorization":f"bearer {TestAdmin}"}
-    return Client
-
 @pytest.fixture
 def GetPin(Client , TestUser):
     res = Client.post("/pinGenerate" , json={'username':TestUser['username']})
     return res.json()[0]['pin']
 
+@pytest.fixture
+def testSchoolAdmin(AdminClient , TestUser2):
+    res = AdminClient.post('/change' , json={'username':TestUser2['username'],'role':1})
+    
+
+@pytest.fixture
+def testInsertSchool(AuthClient , testSchoolAdmin):
+    res = AuthClient.post('/schoolUpdate' , json={'district':'Krishnagiri'})
+    print(res.json())
+    assert res.status_code == 200

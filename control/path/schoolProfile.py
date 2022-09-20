@@ -59,7 +59,7 @@ def setDynamic(data):
 @root.post('/schoolUpdate')
 def UpdateSchool(data : dict , db:Session=Depends(db.get_db) ,  current_user = Depends(auth.current_user)):
     get = db.query(model.schoolProfile).filter(model.schoolProfile.user_id == current_user.id) 
-        
+    print(current_user)   
     if data.get('scholarship'):    
         data['scholarship']=setDynamic(data['scholarship'])
     if data.get('shift'):

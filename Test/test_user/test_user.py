@@ -38,7 +38,7 @@ def test_invalid_login(Client ,TestUser, username , password , status_code):
 def test_get_current_user(AuthClient):
     res = AuthClient.get('/get')
     print(res.json()['name'])
-    assert res.json()['role']==1
+    assert res.json()['role']==0
     assert res.json()['name']=='Muni'
     assert res.status_code == 200
     

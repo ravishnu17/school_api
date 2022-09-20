@@ -1,4 +1,4 @@
-def test_getSchoolProfile(AuthClient , TestUser2):
+def test_getSchoolProfile(AuthClient , testSchoolAdmin , testInsertSchool):
     res = AuthClient.get('/SchoolProfile')
-    print(res.json()['institute'])
+    print(res.json() , testSchoolAdmin)
     assert res.status_code == 200
