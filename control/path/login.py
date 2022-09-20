@@ -116,6 +116,7 @@ def delete(id, db : Session = Depends(db.get_db) , current_user = Depends(auth.c
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Not allowed to delete")    
         return {"detail":"deleted successfully"}
+    
 #change password    
 @root.post('/pwd')
 def pwdchg(password : schema.pwds , response :Response , db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
@@ -189,7 +190,7 @@ def forgotPwd(data:schema.ForgotPwd ,db:Session=Depends(db.get_db)):
 @root.post('/change' )
 def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db) , current_user = Depends(auth.current_user)):
     role = current_user.role
-    if role ==2:
+    if role ==setting.role:
         try:
             get = db.query(model.user).filter(model.user.username == data.username)
             if get.first():
@@ -203,7 +204,6 @@ def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db)
                         db.add(admin_table)
                         db.commit()
                         db.refresh(admin_table)
-                        print(admin_table)
                         response.status_code =status.HTTP_201_CREATED
                         return {"status":"admin created"}
                     else:
@@ -220,7 +220,3 @@ def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db)
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="Unauthorized operation")    
     
-@root.post('/test')
-def check(data:dict):
-    print(data)    
-    return data

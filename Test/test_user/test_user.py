@@ -38,7 +38,7 @@ def test_invalid_login(Client ,TestUser, username , password , status_code):
 def test_get_current_user(AuthClient):
     res = AuthClient.get('/get')
     print(res.json()['name'])
-    assert res.json()['role']==0
+    assert res.json()['role']==1
     assert res.json()['name']=='Muni'
     assert res.status_code == 200
     
@@ -72,9 +72,42 @@ def test_deleteUser(AuthClient):
         res = AuthClient.delete("/delete")
         print(res.json()['detail'])
         assert res.status_code ==200
+
+def test_delete_byID (AdminClient , TestUser):
+    res  = AdminClient.delete(f"/deleteID/{TestUser['id']}")
+    print(res.json()['detail'])
+    assert res.status_code == 200
         
 @pytest.mark.parametrize("old,new,status",[('Muni','Muniraj',202),('muni','muni',406),('muni','Muniraj',403)])
 def test_changePassword(AuthClient,TestUser2 ,old, new ,status):    
     res = AuthClient.post('/pwd',json={"oldPwd":old,"newPwd":new})
     print(res.json()['msg'])
     assert res.status_code == status        
+    
+@pytest.mark.parametrize("user , status", [('Ravishnu',200),('Ravi',404)])    
+def test_pin(Client , TestUser , user , status):
+    res = Client.post('/pinGenerate' , json={'username':user})    
+    print(res.json())
+    assert res.status_code == status
+    
+def test_forgotPassword(Client , TestUser , GetPin):
+    res = Client.post('/forgotPwd' , json={'username':TestUser['username'] ,'pin':GetPin, 'pwd':'Ravi'})
+    print(res.json())
+    assert res.status_code == 200    
+    
+@pytest.mark.parametrize("user , pin , password , status" , [("Ravi","23994","Ravi",404),('Ravishnu',"378432","Ravi",403)])
+def test_invalidPin_forgorPassword(Client , TestUser , user , pin , password , status , GetPin):
+    res = Client.post('/forgotPwd' , json={'username':user,'pin':pin,'pwd':password}) 
+    print(res.json()) 
+    assert res.status_code == status
+    
+@pytest.mark.parametrize("user , role , status" , [('Ravishnu',1,201),('Ravishnu',0,200),('Ravi',1,404)]) 
+def test_changeRoles_byAdmin(AdminClient , TestUser , user , role , status):
+    res = AdminClient.post('/change', json={'username':user,'role':role})
+    print(res.json())
+    assert res.status_code == status
+
+def test_changeRole_byUser(AuthClient ,TestUser):
+    res = AuthClient.post('/change',json={'username':TestUser['username'],"role":1})
+    print(res.json())
+    assert res.status_code == 401   
