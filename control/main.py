@@ -1,6 +1,7 @@
 from fastapi import  FastAPI
+import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
-from .path import login,schoolProfile
+from .path import user,schoolProfile
 from model import model
 from dbconnect import db
 from sqlalchemy import select , insert
@@ -19,7 +20,7 @@ with db.engine.connect() as connect:
         
 root=FastAPI()
 
-root.include_router(login.root)
+root.include_router(user.root)
 root.include_router(schoolProfile.root)
 
 origins = [
@@ -32,6 +33,7 @@ root.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]    
 )
+
 
 @root.get("/")
 def gets():

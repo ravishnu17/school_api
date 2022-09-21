@@ -35,7 +35,8 @@ root=APIRouter(
 def getSchoolProfile(db:Session=Depends(db.get_db) , current_user = Depends(auth.current_user)):
     get = db.query(model.schoolProfile).filter(model.schoolProfile.user_id == current_user.id).first()
     # get.level = getDynamic(get.level)
-    return get
+    # return get
+    return {'generalInformation1':{'institutionName':get.institutionName , 'postalAddress':get.postalAddress, 'district':get.district, 'state':get.state, 'cityVillageTown':get.cityVillageTown, 'pincode':get.pincode, 'url':get.url, 'officeMail':get.officeMail, 'officeMobile':get.officeMobile, 'schoolLocation':get.schoolLocation ,'childNeeds':get.childNeeds, 'academicYear':get.academicYear},'generalInformation2':{"affiliationNature":get.affiliationNature,'correspondentMailId':get.correspondentMailId,'correspondentMobileNo':get.correspondentMobileNo,'correspondentName':get.correspondentName,'establishYear':get.establishYear,'gender':get.gender,'medium':get.medium ,'noBoys':get.noBoys,'noGirls':get.noGirls,'nonTeachingStaff':get.nonTeachingStaff ,'principalMailId':get.principalMailId , 'principalMobileNo':get.principalMobileNo,'principalName':get.principalName,'principalOfficeMobileNo':get.principalOfficeMobileNo,'schoolLevel':get.schoolLevel , 'teachingStaff':get.teachingStaff , 'totalStudent':get.totalStudent}}
     
 #convert dict to list   
 def setDynamic(data):
@@ -58,18 +59,19 @@ def setDynamic(data):
 #update school profile details    
 @root.post('/schoolUpdate')
 def UpdateSchool(data : dict , db:Session=Depends(db.get_db) ,  current_user = Depends(auth.current_user)):
-    get = db.query(model.schoolProfile).filter(model.schoolProfile.user_id == current_user.id) 
-    print(current_user)   
+    get = db.query(model.schoolProfile).filter(model.schoolProfile.user_id == current_user.id)   
     if data.get('scholarship'):    
         data['scholarship']=setDynamic(data['scholarship'])
     if data.get('shift'):
         data['shift']=setDynamic(data['shift'])
     if data.get('schoolClass'):
         data['schoolClass']=setDynamic(data['schoolClass'])
-    if data.get('level'):
-        data['level']=setDynamic(data['level'])  
+    if data.get('schoolLevel'):
+        data['schoolLevel']=setDynamic(data['schoolLevel'])  
     if data.get('medium'):
-        data['medium']=setDynamic(data['medium'])        
+        data['medium']=setDynamic(data['medium']) 
+    # data['generalInformation1'].update(data['generalInformation2'])
+    # print(data)           
     try:
         if get.first():
             get.update(data,synchronize_session=False)
@@ -80,3 +82,4 @@ def UpdateSchool(data : dict , db:Session=Depends(db.get_db) ,  current_user = D
     except Exception as error :
         print(error)
         return {"status":"error"}    
+    print("ended")
