@@ -1,14 +1,14 @@
 import json
 import pytest
 from fastapi.testclient import TestClient
-from control.main import root
-from config.config import setting
+from Controller.main import root
+from Configuration.config import setting
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from dbconnect.db import get_db,Base
-from auth.auth import create_token
-from auth import encrypt
-from model import model
+from DataBase.db import get_db,Base
+from Authorization.auth import create_token
+from Utils import encrypt
+from Model import userClass
 
 
 sql_url = f"postgresql://{setting.db_username}:{setting.db_password}@{setting.db_host}:{setting.db_port}/{setting.db_name}_test"

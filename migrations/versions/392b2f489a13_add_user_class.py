@@ -1,8 +1,8 @@
-"""Auto_add_user_school_table
+"""add_User_class
 
-Revision ID: b8b6066ccf69
+Revision ID: 392b2f489a13
 Revises: 
-Create Date: 2022-09-08 14:22:23.069745
+Create Date: 2022-09-22 11:28:51.153996
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b8b6066ccf69'
+revision = '392b2f489a13'
 down_revision = None
 branch_labels = None
 depends_on = None

@@ -3,11 +3,13 @@ from fastapi import Depends,HTTPException,status ,APIRouter , Response
 from sqlalchemy.orm import Session
 from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
-from dbconnect import db
-from schema import schema
-from auth import auth, encrypt
-from model import model
-from config.config import setting
+from DataBase import db
+from Schema import schema
+from Authorization import auth
+from Model import schoolProfileClass, userClass
+from Configuration.config import setting
+from Utils import encrypt
+
 root = APIRouter(
     tags=['User']
 )
@@ -15,34 +17,42 @@ root = APIRouter(
 #registration API    
 @root.post('/register',status_code=status.HTTP_201_CREATED)
 def register(data:schema.registers, response : Response,db:Session=Depends(db.get_db)):
-    user=db.query(model.user).filter(model.user.username == data.username).first()
-    if user:
-        response.status_code=status.HTTP_409_CONFLICT
-        return {"msg":"try with another username"}
+    check_username=db.query(userClass.User).filter(userClass.User.username == data.username).first()
+    if check_username:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT , detail="Username is unavailable")
     else :
-        mail=db.query(model.user).filter(model.user.email == data.email).first()
-        if mail:
-            response.status_code=status.HTTP_409_CONFLICT
-            return {"msg":"Already register with this mail Id. try with another one"}
+        check_mail=db.query(userClass.User).filter(userClass.User.email == data.email).first()
+        if check_mail:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT , detail="Already register with this mail Id. try with another one")
     
-    enc=encrypt.hash(data.password)
-    data.password=enc
-    new_data=model.user(**data.dict())
-    db.add(new_data)
+    #encrypt user password
+    encrypt_password=encrypt.hash(data.password)
+    data.password=encrypt_password
+    
+    #insert user data to user table
+    insert_user_data=userClass.User(**data.dict())
+    db.add(insert_user_data)
     db.commit()
-    db.refresh(new_data)
-    return new_data
+    db.refresh(insert_user_data)
+    
+    #insert user id to school profile tables
+    insert_profile1 = schoolProfileClass.SchoolProfile1(user_id=insert_user_data.id , username = insert_user_data.username)
+    insert_profile2 = schoolProfileClass.SchoolProfile2(user_id=insert_user_data.id , username = insert_user_data.username)
+    db.add(insert_profile1,insert_profile2)
+    db.commit()
+    
+    return {'email':insert_user_data.email,'status':'success'}
 
         
 #login api
 @root.post("/login")
 def login(data:OAuth2PasswordRequestForm = Depends() ,db:Session=Depends(db.get_db)):  
-    login_data=db.query(model.user).filter(model.user.username==data.username).first()
-    if login_data :     
-        verify=encrypt.check(data.password,login_data.password)
+    check_credential=db.query(userClass.User).filter(userClass.User.username==data.username).first()
+    if check_credential :     
+        verify=encrypt.check(data.password,check_credential.password)
         if verify:
-            token_data = auth.create_token(data={"id":login_data.id,"role":login_data.role , "name":login_data.name})
-            return {"access_token":token_data , "token_type":"bearer" , "role":login_data.role }       
+            token_data = auth.create_token(data={"id":check_credential.id,"role":check_credential.role , "name":check_credential.name})
+            return {"access_token":token_data , "token_type":"bearer" , "role":check_credential.role ,'status':'success' }       
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     else:
@@ -54,119 +64,119 @@ def check(db:Session=Depends(db.get_db) ,current_user = Depends(auth.current_use
     # data=db.query(model.user).all()
     return current_user
 
-#get all user name
+#get all user name  by admin
 @root.get('/getUser')
 def getUser(response:Response , db:Session = Depends(db.get_db), current_user = Depends(auth.current_user)):
-    check = db.query(model.user).filter(model.user.id == current_user.id , model.user.role == current_user.role).first()
-    if check.role ==setting.role and current_user.role == setting.role :
-       user = db.query(model.user.id, model.user.username,model.user.name,model.user.role).filter(model.user.name !="core" , model.user.role != current_user.role).all()
+    check_user = db.query(userClass.User).filter(userClass.User.id == current_user.id , userClass.User.role == current_user.role).first()
+    if check_user.role ==setting.role and current_user.role == setting.role :
+       user = db.query(userClass.User.id, userClass.User.username,userClass.User.name,userClass.User.role).filter(userClass.User.name !="core" , userClass.User.role != current_user.role).all()
     else :
-        response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"detail":"You are not admin"} 
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="Unauthorized operation")
     return user
 
-#get detail by id
+#get user details
 @root.get('/profile',response_model=schema.responses)
 def profile(db:Session=Depends(db.get_db) , current_user = Depends(auth.current_user)):
-    data=db.query(model.user).filter(model.user.id == current_user.id).first()
+    data=db.query(userClass.User).filter(userClass.User.id == current_user.id).first()
     return data
 
 #update user detail
 @root.post('/profileUpdate')
 def update(data:schema.updates,db:Session=Depends(db.get_db),current_user = Depends(auth.current_user)):
-    all=db.query(model.user).filter(model.user.id == current_user.id).first()
-    if all.email != data.email: 
-        user=db.query(model.user).filter(model.user.email != all.email).all()
+    get_user_data=db.query(userClass.User).filter(userClass.User.id == current_user.id).first()
+    if get_user_data.email != data.email: 
+        user=db.query(userClass.User).filter(userClass.User.email != get_user_data.email).all()
         for val in user:
             if data.email == val.email:
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Already registered with this mail ID")        
     
-    if all.username != data.username:
-        user=db.query(model.user).filter(model.user.username != all.username).all()
+    if get_user_data.username != data.username:
+        user=db.query(userClass.User).filter(userClass.User.username != get_user_data.username).all()
         for val in user:
             if data.username == val.username:
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Username Already taken ! Try another") 
     
-    old_data=db.query(model.user).filter(model.user.id == current_user.id)
+    old_data=db.query(userClass.User).filter(userClass.User.id == current_user.id)
     if old_data.first():
         old_data.update(data.dict(),synchronize_session=False)
         db.commit()
         data = old_data.first()
-        return {"data":data , "detail":"updated"}
+        return {"data":data , "status":"success"}
     
  #delete user   
 @root.delete("/delete")
 def delete( db : Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
-        old_data = db.query(model.user).filter(model.user.id == current_user.id)
-        if not old_data.first():
+        get_user = db.query(userClass.User).filter(userClass.User.id == current_user.id)
+        if not get_user.first():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="User not found")
-        old_data.delete(synchronize_session=False)
+        get_user.delete(synchronize_session=False)
         db.commit()
-        return {"detail":"deleted successfully"}
+        return {"status":"deleted successfully"}
         
 @root.delete("/deleteID/{id}")
 def delete(id, db : Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
-        owner = db.query(model.user).filter(model.user.id == current_user.id).first()
+        owner = db.query(userClass.User).filter(userClass.User.id == current_user.id).first()
         if owner.role == setting.role and current_user.role == setting.role:
-            data = db.query(model.user).filter(model.user.id == id)
+            data = db.query(userClass.User).filter(userClass.User.id == id)
             if not data.first():
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="User not found")
             data.delete(synchronize_session=False)
             db.commit()
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Not allowed to delete")    
-        return {"detail":"deleted successfully"}
+        return {"status":"deleted successfully"}
     
 #change password    
-@root.post('/pwd')
+@root.post('/password')
 def pwdchg(password : schema.pwds , response :Response , db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
     if password.oldPwd == password.newPwd :
         response.status_code=status.HTTP_406_NOT_ACCEPTABLE
-        return {"status":2 ,"msg":"old and new password should not be same"}
-    get = db.query(model.user).filter(model.user.id == current_user.id)
+        return {"status":0 ,"detail":"old and new password should not be same"}
+    get = db.query(userClass.User).filter(userClass.User.id == current_user.id)
+    
     decode = encrypt.check(password.oldPwd ,get.first().password)
     if not decode:
         response.status_code=status.HTTP_403_FORBIDDEN
-        return {"status":0 , "msg":"old password is incorrect"}
+        return {"status":1, "detail":"old password is incorrect"}
     else:
         encode = encrypt.hash(password.newPwd)
         get.update({"password":encode},synchronize_session=False)
         db.commit()
         response.status_code=status.HTTP_202_ACCEPTED
-        return {"status":1 , "msg":"password changed"}
+        return {"status":2 , "detail":"password changed"}
 
 global key
 key= []   
 #generate pin
 @root.post('/pinGenerate')
 def Generate(data:dict, db:Session=Depends(db.get_db)):
-    get = db.query(model.user).filter(model.user.username ==data['username']).first()
-    if not get:
+    get_user = db.query(userClass.User).filter(userClass.User.username ==data['username']).first()
+    if not get_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Username not exists")
     
     pin=random.randint(123456,999999)
-    name=-1
+    index=-1
     if key !=[]:
         for i in range(key.index(key[-1])+1):
             if key[i]['username'] == data['username']:
-                name=i
+                index=i
                 
-        if name !=-1:
-            key[name]['pin']=pin
+        if index !=-1:
+            key[index]['pin']=pin
         else:
-            val={"username":get.username,"pin":pin}
+            val={"username":get_user.username,"pin":pin}
             key.append(val)      
     else:
-        val={"username":get.username,"pin":pin}
+        val={"username":get_user.username,"pin":pin}
         key.append(val)
                 
     return key   
     
 #forgot password
-@root.post('/forgotPwd')
+@root.post('/forgotPassword')
 def forgotPwd(data:schema.ForgotPwd ,db:Session=Depends(db.get_db)):
-    find = db.query(model.user).filter(model.user.username == data.username)
-    if not find.first():
+    find_user = db.query(userClass.User).filter(userClass.User.username == data.username)
+    if not find_user.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Username not exists ,Please Register")       
     
     try:
@@ -181,35 +191,23 @@ def forgotPwd(data:schema.ForgotPwd ,db:Session=Depends(db.get_db)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Invalid pin")
     
     enPwd = encrypt.hash(data.pwd)
-    find.update({"password" : enPwd } , synchronize_session=False)
+    find_user.update({"password" : enPwd } , synchronize_session=False)
     db.commit()
     return {"status":"successfully changed"}
             
 
 #change Role:
-@root.post('/change' )
+@root.post('/changeRole' )
 def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db) , current_user = Depends(auth.current_user)):
-    role = current_user.role
-    if role ==setting.role:
+    if current_user.role ==setting.role:
         try:
-            get = db.query(model.user).filter(model.user.username == data.username)
+            get = db.query(userClass.User).filter(userClass.User.username == data.username)
             if get.first():
                 user = get.first()
                 get.update(data.dict(), synchronize_session=False)
                 db.commit()
                 if data.role == 1:
-                    check = db.query(model.schoolProfile).filter(model.schoolProfile.user_id == get.first().id).first()
-                    if not check:
-                        admin_table = model.schoolProfile(user_id = get.first().id , username = get.first().username)
-                        db.add(admin_table)
-                        db.commit()
-                        db.refresh(admin_table)
-                        response.status_code =status.HTTP_201_CREATED
-                        return {"status":"admin created"}
-                    else:
-                        response.status_code = status.HTTP_200_OK
                         return {"status":f"{user.name} change to Admin"}
-                response.status_code = status.HTTP_200_OK
                 return {"status":f"{user.name} change to User"}
             else :
                 response.status_code = status.HTTP_404_NOT_FOUND

@@ -1,9 +1,9 @@
 import json
 import pytest
 # from fastapi.testclient import TestClient
-from control.main import root
-from schema import schema
-from auth import encrypt
+from Controller.main import root
+from Schema import schema
+from Utils import encrypt
 
 # client = TestClient(root)
 
