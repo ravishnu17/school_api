@@ -1,12 +1,12 @@
 from sqlalchemy import Column, Integer,String ,Boolean , TIME ,Date,BigInteger,ForeignKey, ARRAY
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
-from Model.userClass import Base,User
+from Model.user import Base,User
 
 from sqlalchemy.orm import relationship
-
-class SchoolProfile1(Base):
-    __tablename__ = "SchoolProfile1"
+    
+class SchoolProfile(Base):
+    __tablename__ = "SchoolProfile"
     owner = relationship('User')
     
     id=Column(Integer,primary_key=True,nullable=False)
@@ -23,15 +23,7 @@ class SchoolProfile1(Base):
     officeMobile=Column(BigInteger,nullable=True)
     schoolLocation=Column(String,nullable=True)
     childNeeds=Column(String,nullable=True)
-    academicYear=Column(String,nullable=True)
-    
-class SchoolProfile2(Base):
-    __tablename__ = "SchoolProfile2"
-    owner = relationship('User')
-    
-    id=Column(Integer,primary_key=True,nullable=False)
-    user_id=Column(Integer,ForeignKey("user_data.id",ondelete="CASCADE"), nullable=False)
-    username = Column(String,nullable=True , unique=True)    
+    academicYear=Column(String,nullable=True)    
     establishYear=Column(String,nullable=True)
     schoolLevel=Column(ARRAY(String),nullable=True)
     medium=Column(ARRAY(String),nullable=True)
@@ -49,22 +41,21 @@ class SchoolProfile2(Base):
     principalMailId=Column(String,nullable=True)
     principalOfficeMobileNo=Column(BigInteger,nullable=True)
     principalMobileNo=Column(BigInteger,nullable=True)
-    
-    # recognized=Column(String,nullable=True)
-    # board_name=Column(String,nullable=True)
-    # affiliate_number=Column(String,nullable=True)
-    # affiliate_year=Column(Integer,nullable=True)
-    # affiliate_type=Column(String,nullable=True)
-    # affiliate_state=Column(String,nullable=True)
-    # christian=Column(Integer,nullable=True)
-    # hindu=Column(Integer,nullable=True)
-    # islam=Column(Integer,nullable=True)
-    # others=Column(Integer,nullable=True)
-    # nonBeliver=Column(Integer,nullable=True)
-    # fire=Column(String,nullable=True)
-    # sanitation=Column(String,nullable=True)
-    # building=Column(String,nullable=True)
-    # minority=Column(String,nullable=True)
+    recognizedByGovern=Column(String,nullable=True)
+    boardName=Column(String,nullable=True)
+    affiliationNumber=Column(String,nullable=True)
+    affiliationYear=Column(Integer,nullable=True)
+    affiliationType=Column(String,nullable=True)
+    affiliationStatement=Column(String,nullable=True)
+    christian=Column(Integer,nullable=True)
+    hindu=Column(Integer,nullable=True)
+    islam=Column(Integer,nullable=True)
+    others=Column(Integer,nullable=True)
+    nonBeliver=Column(Integer,nullable=True)
+    fire=Column(String,nullable=True)
+    sanitation=Column(String,nullable=True)
+    building=Column(String,nullable=True)
+    minority=Column(String,nullable=True)
     # own=Column(String,nullable=True)
     # trust_name=Column(String,nullable=True)
     # trust_register=Column(String,nullable=True)
