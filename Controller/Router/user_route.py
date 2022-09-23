@@ -5,7 +5,7 @@ from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
 from DataBase import db
 from Model.schoolProfileModel import schoolProfile
-from Schema import schema
+from Schemas import schema
 from Authorization import auth
 from Model.userModel import user
 from Configuration.config import setting

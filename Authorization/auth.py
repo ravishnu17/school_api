@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from jose import JWTError , jwt
-from Schema import schema
+from Schemas import schema
 from Configuration import config
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends ,status , HTTPException
