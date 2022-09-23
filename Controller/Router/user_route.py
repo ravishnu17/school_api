@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session
 from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
 from DataBase import db
+from Model.schoolProfileModel import schoolProfile
 from Schema import schema
 from Authorization import auth
-from Model import schoolProfile, user
+from Model.userModel import user
 from Configuration.config import setting
 from Utils import encrypt
 
@@ -39,8 +40,8 @@ def register(data:schema.registers, response : Response,db:Session=Depends(db.ge
     insert_profile = schoolProfile.SchoolProfile(user_id=insert_user_data.id , username = insert_user_data.username)
     db.add(insert_profile)
     db.commit()
-    
-    return {'email':insert_user_data.email,'status':'success'}
+    db.refresh(insert_user_data)
+    return insert_user_data
 
         
 #login api
@@ -65,7 +66,7 @@ def check(db:Session=Depends(db.get_db) ,current_user = Depends(auth.current_use
 
 #get all user name  by admin
 @root.get('/getUser')
-def getUser(response:Response , db:Session = Depends(db.get_db), current_user = Depends(auth.current_user)):
+def getUser(db:Session = Depends(db.get_db), current_user = Depends(auth.current_user)):
     check_user = db.query(user.User).filter(user.User.id == current_user.id , user.User.role == current_user.role).first()
     if check_user.role ==setting.role and current_user.role == setting.role :
        get_user = db.query(user.User.id, user.User.username,user.User.name,user.User.role).filter(user.User.name !="core" , user.User.role != current_user.role).all()
@@ -100,7 +101,7 @@ def update(data:schema.updates,db:Session=Depends(db.get_db),current_user = Depe
         old_data.update(data.dict(),synchronize_session=False)
         db.commit()
         data = old_data.first()
-        return {"data":data , "status":"success"}
+        return {'username':data.username , "status":"success"}
     
  #delete user   
 @root.delete("/delete")

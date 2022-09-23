@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from DataBase.db import get_db,Base
 from Authorization.auth import create_token
 from Utils import encrypt
-from Model import user
+from Model.userModel import user
 
 
 sql_url = f"postgresql://{setting.db_username}:{setting.db_password}@{setting.db_host}:{setting.db_port}/{setting.db_name}_test"

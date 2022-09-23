@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from .Router import school_route, user_route
-from Model import user
+from Model.userModel import user
 from DataBase import db
 from sqlalchemy import select , insert
 from Utils import encrypt

@@ -20,7 +20,7 @@ def test_register(Client ):
 @pytest.mark.parametrize("username , email , status",[("Ravishnu","ravi12@gmail.com",409),("ravi","ravi@gmail.com",409)])
 def test_invalid_register(Client ,TestUser, username ,email,status):
     res=Client.post("/register",json = {"name":"Ravishnu","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":email,"username":username,"password":"Ravishnu","district":"Krishnagiri"})
-    print("\n",res.json()['msg'])
+    print("\n",res.json()['detail'])
     assert res.status_code == status 
 
     
@@ -65,23 +65,23 @@ def test_update_currentUserData(AuthClient ,TestUser ,  TestUser2 , username ,em
     data ={"name":"Muni","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":email,"username":username,"password":"Muni","district":"Krishnagiri"}
     data['password'] = encrypt.hash(data['password'])
     res = AuthClient.post("/profileUpdate" , json=data)   
-    print(res.json()['detail'])
+    print(res.json())
     assert res.status_code == status
     
 def test_deleteUser(AuthClient):
         res = AuthClient.delete("/delete")
-        print(res.json()['detail'])
+        print(res.json()['status'])
         assert res.status_code ==200
 
 def test_delete_byID (AdminClient , TestUser):
     res  = AdminClient.delete(f"/deleteID/{TestUser['id']}")
-    print(res.json()['detail'])
+    print(res.json()['status'])
     assert res.status_code == 200
         
 @pytest.mark.parametrize("old,new,status",[('Muni','Muniraj',202),('muni','muni',406),('muni','Muniraj',403)])
 def test_changePassword(AuthClient,TestUser2 ,old, new ,status):    
-    res = AuthClient.post('/pwd',json={"oldPwd":old,"newPwd":new})
-    print(res.json()['msg'])
+    res = AuthClient.post('/password',json={"oldPwd":old,"newPwd":new})
+    print(res.json()['detail'])
     assert res.status_code == status        
     
 @pytest.mark.parametrize("user , status", [('Ravishnu',200),('Ravi',404)])    
@@ -91,23 +91,23 @@ def test_pin(Client , TestUser , user , status):
     assert res.status_code == status
     
 def test_forgotPassword(Client , TestUser , GetPin):
-    res = Client.post('/forgotPwd' , json={'username':TestUser['username'] ,'pin':GetPin, 'pwd':'Ravi'})
-    print(res.json())
+    res = Client.post('/forgotPassword' , json={'username':TestUser['username'] ,'pin':GetPin, 'pwd':'Ravi'})
+    print(res.json()['status'])
     assert res.status_code == 200    
     
 @pytest.mark.parametrize("user , pin , password , status" , [("Ravi","23994","Ravi",404),('Ravishnu',"378432","Ravi",403)])
 def test_invalidPin_forgorPassword(Client , TestUser , user , pin , password , status , GetPin):
-    res = Client.post('/forgotPwd' , json={'username':user,'pin':pin,'pwd':password}) 
-    print(res.json()) 
+    res = Client.post('/forgotPassword' , json={'username':user,'pin':pin,'pwd':password}) 
+    print(res.json()['detail']) 
     assert res.status_code == status
     
-@pytest.mark.parametrize("user , role , status" , [('Ravishnu',1,201),('Ravishnu',0,200),('Ravi',1,404)]) 
+@pytest.mark.parametrize("user , role , status" , [('Ravishnu',1,200),('Ravishnu',0,200),('Ravi',1,404)]) 
 def test_changeRoles_byAdmin(AdminClient , TestUser , user , role , status):
-    res = AdminClient.post('/change', json={'username':user,'role':role})
-    print(res.json())
+    res = AdminClient.post('/changeRole', json={'username':user,'role':role})
+    print(res.json()['status'])
     assert res.status_code == status
 
 def test_changeRole_byUser(AuthClient ,TestUser):
-    res = AuthClient.post('/change',json={'username':TestUser['username'],"role":1})
-    print(res.json())
+    res = AuthClient.post('/changeRole',json={'username':TestUser['username'],"role":1})
+    print(res.json()['detail'])
     assert res.status_code == 401   

@@ -56,9 +56,6 @@ class token(BaseModel):
     role : Optional[int] = None  
     name : Optional[str] = None    
     
-class User(BaseModel):
-    name : str
-            
 class ForgotPwd(BaseModel):
     username:str
     pin:int
