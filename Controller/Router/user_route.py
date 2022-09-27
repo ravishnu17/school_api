@@ -81,7 +81,7 @@ def profile(db:Session=Depends(db.get_db) , current_user = Depends(auth.current_
     return data
 
 #update user detail
-@root.post('/profileUpdate')
+@root.put('/profileUpdate')
 def update(data:schema.updates,db:Session=Depends(db.get_db),current_user = Depends(auth.current_user)):
     get_user_data=db.query(user.User).filter(user.User.id == current_user.id).first()
     if get_user_data.email != data.email: 
@@ -127,7 +127,7 @@ def delete(id, db : Session = Depends(db.get_db) , current_user = Depends(auth.c
         return {"status":"deleted successfully"}
     
 #change password    
-@root.post('/password')
+@root.put('/password')
 def pwdchg(password : schema.pwds , response :Response , db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
     if password.oldPwd == password.newPwd :
         response.status_code=status.HTTP_406_NOT_ACCEPTABLE
@@ -174,7 +174,7 @@ def Generate(data:dict, db:Session=Depends(db.get_db)):
     
 #forgot password
 @root.post('/forgotPassword')
-def forgotPwd(data:schema.ForgotPwd ,db:Session=Depends(db.get_db)):
+def forgotPwd(data:schema.ForgotPassword ,db:Session=Depends(db.get_db)):
     find_user = db.query(user.User).filter(user.User.username == data.username)
     if not find_user.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Username not exists ,Please Register")       
@@ -190,7 +190,7 @@ def forgotPwd(data:schema.ForgotPwd ,db:Session=Depends(db.get_db)):
     if data.pin != pin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Invalid pin")
     
-    enPwd = encrypt.hash(data.pwd)
+    enPwd = encrypt.hash(data.password)
     find_user.update({"password" : enPwd } , synchronize_session=False)
     db.commit()
     return {"status":"successfully changed"}
@@ -207,13 +207,17 @@ def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db)
                 get.update(data.dict(), synchronize_session=False)
                 db.commit()
                 if data.role == 1:
-                        check_school_table = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == user_data.id).first()
-                        if not check_school_table:
-                            add =schoolProfile.SchoolProfile(user_id = user_data.id , username = user_data.username)
-                            db.add(add)
-                            db.commit()
-                        return {"status":f"{user_data.name} change to Admin"}
-                return {"status":f"{user_data.name} change to User"}
+                    check_school_table = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == user_data.id).first()
+                    if not check_school_table:
+                        add =schoolProfile.SchoolProfile(user_id = user_data.id , username = user_data.username)
+                        db.add(add)
+                        db.commit()
+                    return {"status":f"{user_data.name} change to Admin"}
+                
+                elif data.role == 0 :
+                    get.update({"role": 0}, synchronize_session=False)
+                    db.commit()
+                    return {"status":f"{user_data.name} change to User"}
             else :
                 response.status_code = status.HTTP_404_NOT_FOUND
                 return {"status":"user not found"}

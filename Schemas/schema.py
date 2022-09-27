@@ -56,10 +56,10 @@ class token(BaseModel):
     role : Optional[int] = None  
     name : Optional[str] = None    
     
-class ForgotPwd(BaseModel):
+class ForgotPassword(BaseModel):
     username:str
     pin:int
-    pwd:str            
+    password:str            
     
 # class scholar(BaseModel):
 #     scholarshipName:str

@@ -91,13 +91,13 @@ def test_pin(Client , TestUser , user , status):
     assert res.status_code == status
     
 def test_forgotPassword(Client , TestUser , GetPin):
-    res = Client.post('/forgotPassword' , json={'username':TestUser['username'] ,'pin':GetPin, 'pwd':'Ravi'})
+    res = Client.post('/forgotPassword' , json={'username':TestUser['username'] ,'pin':GetPin, 'password':'Ravi'})
     print(res.json()['status'])
     assert res.status_code == 200    
     
 @pytest.mark.parametrize("user , pin , password , status" , [("Ravi","23994","Ravi",404),('Ravishnu',"378432","Ravi",403)])
 def test_invalidPin_forgorPassword(Client , TestUser , user , pin , password , status , GetPin):
-    res = Client.post('/forgotPassword' , json={'username':user,'pin':pin,'pwd':password}) 
+    res = Client.post('/forgotPassword' , json={'username':user,'pin':pin,'password':password}) 
     print(res.json()['detail']) 
     assert res.status_code == status
     

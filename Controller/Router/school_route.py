@@ -4,6 +4,7 @@ from typing import List
 from Model.schoolProfileModel import schoolProfile
 from DataBase import db
 from Authorization import auth
+from Model.userModel.user import User
 
 root=APIRouter(
     tags=['School Profile']
@@ -147,9 +148,13 @@ def setDynamic(data):
     return set        
         
 #update school profile details    
-@root.post('/schoolUpdate')
+@root.put('/schoolUpdate')
 def update_school(data : dict , db:Session=Depends(db.get_db) ,  current_user = Depends(auth.current_user)):
+    if current_user.role !=1:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN , detail="Contact the Team")
+    
     get_data = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == current_user.id)   
+    
     if data.get('scholarship'):    
         data['scholarship']=setDynamic(data['scholarship'])
     if data.get('shift'):
@@ -159,7 +164,8 @@ def update_school(data : dict , db:Session=Depends(db.get_db) ,  current_user = 
     if data.get('schoolLevel'):
         data['schoolLevel']=setDynamic(data['schoolLevel'])  
     if data.get('medium'):
-        data['medium']=setDynamic(data['medium']) 
+        data['medium']=setDynamic(data['medium'])
+        
     # data['generalInformation1'].update(data['generalInformation2'])
     # print(data)           
     try:
@@ -172,3 +178,32 @@ def update_school(data : dict , db:Session=Depends(db.get_db) ,  current_user = 
     except Exception as error :
         print(error)
         raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED , detail="Try Again!")   
+    
+
+@root.put('/changeAll')
+def clearSchoolData(data:dict,db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
+    userData = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == current_user.id)
+    if not userData.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail='Data not found')
+    # userData.update(da ,synchronize_session=False)
+    # db.commit()
+    school = {}
+    for list in data:
+        print(list)
+        school.update(data[list])
+        # print(school)
+        
+    if school.get('scholarship'):    
+        school['scholarship']=setDynamic(school['scholarship'])
+    if school.get('shift'):
+        school['shift']=setDynamic(school['shift'])
+    if school.get('schoolClass'):
+        school['schoolClass']=setDynamic(school['schoolClass'])
+    if school.get('schoolLevel'):
+        school['schoolLevel']=setDynamic(school['schoolLevel'])  
+    if school.get('medium'):
+        school['medium']=setDynamic(school['medium'])    
+        
+    userData.update(school,synchronize_session=False)
+    db.commit()
+    return {"status":"data updated"} 
