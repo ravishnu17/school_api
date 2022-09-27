@@ -38,7 +38,7 @@ def test_invalid_login(Client ,TestUser, username , password , status_code):
 def test_get_current_user(AuthClient):
     res = AuthClient.get('/get')
     print(res.json()['name'])
-    assert res.json()['role']==0
+    assert res.json()['role']==1
     assert res.json()['name']=='Muni'
     assert res.status_code == 200
     
@@ -64,7 +64,7 @@ def test_get_currentUserProfile(AuthClient , TestUser2):
 def test_update_currentUserData(AuthClient ,TestUser ,  TestUser2 , username ,email ,status):
     data ={"name":"Muni","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":email,"username":username,"password":"Muni","district":"Krishnagiri"}
     data['password'] = encrypt.hash(data['password'])
-    res = AuthClient.post("/profileUpdate" , json=data)   
+    res = AuthClient.put("/profileUpdate" , json=data)   
     print(res.json())
     assert res.status_code == status
     
@@ -80,7 +80,7 @@ def test_delete_byID (AdminClient , TestUser):
         
 @pytest.mark.parametrize("old,new,status",[('Muni','Muniraj',202),('muni','muni',406),('muni','Muniraj',403)])
 def test_changePassword(AuthClient,TestUser2 ,old, new ,status):    
-    res = AuthClient.post('/password',json={"oldPwd":old,"newPwd":new})
+    res = AuthClient.put('/password',json={"oldPwd":old,"newPwd":new})
     print(res.json()['detail'])
     assert res.status_code == status        
     
