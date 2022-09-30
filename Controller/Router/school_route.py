@@ -380,7 +380,7 @@ def insertNewProfile( data:dict , db:Session=Depends(db.get_db)):
     if userData:
         if check.first():
             del data['user_id']
-            print("update")
+            print("update",data)
             check.update(data,synchronize_session=False)
             db.commit()
             return {"status":"Successfully added"}
