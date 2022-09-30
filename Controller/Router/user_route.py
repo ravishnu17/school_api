@@ -204,19 +204,23 @@ def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db)
             get = db.query(user.User).filter(user.User.username == data.username)
             if get.first():
                 user_data = get.first()
-                get.update(data.dict(), synchronize_session=False)
+                get.update({"role":data.role}, synchronize_session=False)
                 db.commit()
+                
+                check_school_table = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == user_data.id)
+
                 if data.role == 1:
-                    check_school_table = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == user_data.id).first()
-                    if not check_school_table:
+                    # check_school_table = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == user_data.id).first()
+                    if not check_school_table.first():
                         add =schoolProfile.SchoolProfile(user_id = user_data.id , username = user_data.username)
                         db.add(add)
                         db.commit()
                     return {"status":f"{user_data.name} change to Admin"}
                 
                 elif data.role == 0 :
-                    get.update({"role": 0}, synchronize_session=False)
-                    db.commit()
+                    if check_school_table.first():
+                        check_school_table.delete(synchronize_session=False)
+                        db.commit()
                     return {"status":f"{user_data.name} change to User"}
             else :
                 response.status_code = status.HTTP_404_NOT_FOUND
@@ -226,4 +230,14 @@ def change(data:schema.change ,response:Response , db:Session=Depends(db.get_db)
             raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED , detail="Something went wrong!")
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="Unauthorized operation")    
+   
+   
+
+#get user name who don't have school profile 
+@root.get('/getUserName')
+def getUser(db:Session = Depends(db.get_db)):
+    get_schoolUser = db.query(schoolProfile.SchoolProfile.username)
+        
+    get_user = db.query(user.User.id, user.User.username,user.User.name,user.User.role).filter(~user.User.username.in_(get_schoolUser),user.User.username !=f'{setting.adminuser}').all()
+    return get_user
     

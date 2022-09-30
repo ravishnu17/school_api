@@ -16,7 +16,7 @@ with db.engine.connect() as connect:
     data = None
     for row in connect.execute(query):
         data=row
-        print(f'admin - {row}')
+        # print(f'admin - {row}')
     if not data:
         connect.execute(insert(user.User),{"name":"core","gender":"male","dob":"2002-07-17","mobile":1234567890,"email":setting.email,"username":setting.adminuser,"password":encrypt.hash(setting.password),"role":setting.role,"district":"krishnagiri"})
 
@@ -27,7 +27,7 @@ root.include_router(user_route.root)
 root.include_router(school_route.root)
 
 origins = [
-    "https://school-design-angular.herokuapp.com",
+    "https://school-view-manage.herokuapp.com",
     "http://localhost:4200"
 ]
 root.add_middleware(
