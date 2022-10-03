@@ -167,7 +167,18 @@ def updateSchoolProfile(id ,data:dict, db:Session = Depends(db.get_db), current_
 #insert new school profile
 @root.post('/newProfile')
 def insertNewProfile( data:dict , db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
-    print(data)
+    # print(data)
+    if data.get('scholarship'):    
+        data['scholarship']=setDynamic(data['scholarship'])
+    if data.get('shift'):
+        data['shift']=setDynamic(data['shift'])
+    if data.get('schoolClass'):
+        data['schoolClass']=setDynamic(data['schoolClass'])
+    if data.get('schoolLevel'):
+        data['schoolLevel']=setDynamic(data['schoolLevel'])  
+    if data.get('medium'):
+        data['medium']=setDynamic(data['medium'])
+        
     check = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == data['user_id'])
     check_user = db.query(User).filter(User.id == data['user_id'])
     userData = check_user.first()
