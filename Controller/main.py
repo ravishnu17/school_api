@@ -2,6 +2,8 @@ from fastapi import  FastAPI , Depends
 from sqlalchemy.orm import Session
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+
+from Controller.Router import manage_school
 from .Router import school_route, user_route
 from Model.userModel import user
 from DataBase import db
@@ -25,6 +27,7 @@ root=FastAPI()
 
 root.include_router(user_route.root)
 root.include_router(school_route.root)
+root.include_router(manage_school.root)
 
 origins = [
     "https://school-view-manage.herokuapp.com",

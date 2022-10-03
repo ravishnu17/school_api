@@ -36,11 +36,11 @@ def register(data:schema.registers, response : Response,db:Session=Depends(db.ge
     db.commit()
     db.refresh(insert_user_data)
     
-    #insert user id to school profile tables
-    insert_profile = schoolProfile.SchoolProfile(user_id=insert_user_data.id , username = insert_user_data.username)
-    db.add(insert_profile)
-    db.commit()
-    db.refresh(insert_user_data)
+    # #insert user id to school profile tables
+    # insert_profile = schoolProfile.SchoolProfile(user_id=insert_user_data.id , username = insert_user_data.username)
+    # db.add(insert_profile)
+    # db.commit()
+    # db.refresh(insert_user_data)
     return insert_user_data
 
         

@@ -5,38 +5,25 @@ from Model.schoolProfileModel import schoolProfile
 from DataBase import db
 from Authorization import auth
 from Model.userModel.user import User
+from .school_route import setDynamic
 
-
-root=APIRouter(
-    tags=['School Profile']
+root = APIRouter(
+    tags=['Manage School Profile']
 )
 
-# def getDynamic(data):
-    # if index==0:
-    #     keys=["scholarshipName","scholarshipBoys","scholarshipGirls","Govtscholarship","Pvtscholarship"]
-    # elif index==1:
-    #     keys=["shiftName","shiftFromDate","shiftToDate","shiftFromTime","shiftToTime","shiftRemark"]
-    # elif index ==2:
-    #     keys = ["className","classSection","classBoys","classGirls","classStudent"] 
-    # keys=['id','text']
-    # get={}
-    # set=[]
-    # for list in data:
-    #     for i in range(list.index(list[-1])+1):
-    #         get.update({keys[i]:list[i]})
-    #     set.append(get)
-    #     get={}   
-    # return set
-
-      
-#get school profile details    
-@root.get('/SchoolProfile')
+#get school profile details   
+@root.get('/SchoolProfileData')
 def school_profile_data(db:Session=Depends(db.get_db) , current_user = Depends(auth.current_user)):
-    get = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == current_user.id).first()
+    get = db.query(schoolProfile.SchoolProfile).all()
     # get.level = getDynamic(get.level)
     # return {'generalInformation1':get1 , 'generalInformation2':get2}
-    if get:
-        return {'Information1':
+    return get
+
+#get school profile details by id
+@root.get('/schoolData/{id}')
+def schoolData(id , db:Session = Depends(db.get_db), current_user = Depends(auth.current_user)):
+    get = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.id == id).first()
+    return {'Information1':
         {
             'institutionName':get.institutionName , 'postalAddress':get.postalAddress, 'district':get.district, 'state':get.state, 'cityVillageTown':get.cityVillageTown, 'pincode':get.pincode, 'url':get.url, 'officeMail':get.officeMail, 'officeMobile':get.officeMobile, 'schoolLocation':get.schoolLocation ,'childNeeds':get.childNeeds, 'academicYear':get.academicYear
         },
@@ -129,32 +116,32 @@ def school_profile_data(db:Session=Depends(db.get_db) , current_user = Depends(a
         'Information20':{'shift':get.shift,'schoolClass':get.schoolClass},
         
         }
-
-#convert dict to list or array   
-def setDynamic(data):
-    #store
-    getKey:list=[] 
-    get:list=[]
-    set:list=[]
-    for list in data:
-        for keys in list:
-            getKey.append(keys)       
-        break    
     
-    for list in data:
-        for load in getKey:
-            get.append(list[load])
-        set.append(get)
-        get=[] 
-    return set        
+#delete school profile by id    
+@root.delete("/deleteSchoolID/{id}")
+def delete(id, db : Session = Depends(db.get_db) , current_user = Depends(auth.current_user)):
+        schoolData = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.id == id)
+        profileData = schoolData.first()
         
-#update school profile details    
-@root.put('/schoolUpdate')
-def update_school(data : dict , db:Session=Depends(db.get_db) ,  current_user = Depends(auth.current_user)):
-    if current_user.role !=1:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN , detail="Contact the Team")
+        if not profileData:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="User not found")
+        else:
+            UserData = db.query(User).filter(User.id == profileData.user_id)
+            
+            if UserData.first():
+                UserData.update({"role":0},synchronize_session=False)
+                db.commit()
+            
+        schoolData.delete(synchronize_session=False)
+        db.commit()
+        
+        return {"status":"deleted successfully"}
     
-    get_data = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == current_user.id)   
+    
+#update school profile by id
+@root.put("/updateSchoolProfile/{id}")
+def updateSchoolProfile(id ,data:dict, db:Session = Depends(db.get_db), current_user = Depends(auth.current_user)):
+    get_data = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.id == id)   
     
     if data.get('scholarship'):    
         data['scholarship']=setDynamic(data['scholarship'])
@@ -166,9 +153,7 @@ def update_school(data : dict , db:Session=Depends(db.get_db) ,  current_user = 
         data['schoolLevel']=setDynamic(data['schoolLevel'])  
     if data.get('medium'):
         data['medium']=setDynamic(data['medium'])
-        
-    # data['generalInformation1'].update(data['generalInformation2'])
-    # print(data)           
+               
     try:
         if get_data.first():
             get_data.update(data,synchronize_session=False)
@@ -180,32 +165,24 @@ def update_school(data : dict , db:Session=Depends(db.get_db) ,  current_user = 
         print(error)
         raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED , detail="Try Again!")   
     
-#change all data in school profile
-@root.put('/changeAll')
-def clearSchoolData(data:dict,db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
-    userData = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == current_user.id)
-    if not userData.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail='Data not found')
-    # userData.update(da ,synchronize_session=False)
-    # db.commit()
-    school = {}
-    for list in data:
-        print(list)
-        school.update(data[list])
-        # print(school)
-        
-    if school.get('scholarship'):    
-        school['scholarship']=setDynamic(school['scholarship'])
-    if school.get('shift'):
-        school['shift']=setDynamic(school['shift'])
-    if school.get('schoolClass'):
-        school['schoolClass']=setDynamic(school['schoolClass'])
-    if school.get('schoolLevel'):
-        school['schoolLevel']=setDynamic(school['schoolLevel'])  
-    if school.get('medium'):
-        school['medium']=setDynamic(school['medium'])    
-        
-    userData.update(school,synchronize_session=False)
-    db.commit()
-    return {"status":"data updated"} 
-
+#insert new school profile
+@root.post('/newProfile')
+def insertNewProfile( data:dict , db:Session=Depends(db.get_db), current_user = Depends(auth.current_user)):
+    print(data)
+    check = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == data['user_id'])
+    check_user = db.query(User).filter(User.id == data['user_id'])
+    userData = check_user.first()
+    if userData:
+        if check.first():
+            data.pop('user_id')
+            print("update",data)
+            check.update(data,synchronize_session=False)
+            db.commit()
+            return {"status":"Successfully added"}
+        else:
+            print("new")
+            newProfile = schoolProfile.SchoolProfile(**data,username = userData.username)
+            db.add(newProfile)
+            check_user.update({"role":1},synchronize_session=False)
+            db.commit()
+            return {"status":"Successfully added"}
