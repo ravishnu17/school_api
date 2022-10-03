@@ -44,7 +44,7 @@ def Client():
 #create test Admin
 @pytest.fixture
 def TestAdmin(Client):    
-    userData={"name":"ADMIN","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"admin@gmail.com","username":"ADMIN@ADMIN","password":encrypt.hash("ADMIN@ADMIN"),"role":2,"district":"Krishnagiri"}
+    userData={"name":"core","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":f"{setting.email}","username":f"{setting.adminuser}","password":encrypt.hash(f"{setting.password}"),"role":f"{setting.role}","district":"Krishnagiri"}
     res = Client.post('/register',json=userData)
     user = res.json()
     
@@ -79,6 +79,7 @@ def TestUser2(Client):
     userData={"name":"Muni","dob":"2002-07-17","gender":"male","mobile":"9876504321","email":"muni@gmail.com","username":"Muni","password":"Muni","role":1,"district":"Krishnagiri"}
     res = Client.post('/register',json=userData)
     user = res.json()
+    
     user['password'] = userData['password']
     return user
 
@@ -90,6 +91,11 @@ def Token(TestUser2):
 def AuthClient(Client , Token):
     Client.headers = {**Client.headers , "Authorization":f"bearer {Token}"}
     return Client
+
+@pytest.fixture
+def test_schoolData(AdminClient , TestUser2):
+    res = AdminClient.post('/changeRole',json={'username':TestUser2['username'],'role':1})
+    
 
 
 @pytest.fixture

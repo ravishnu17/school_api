@@ -1,11 +1,11 @@
-def test_getSchoolProfile(AuthClient ):
+def test_getSchoolProfile(test_schoolData , AuthClient):
     res = AuthClient.get('/SchoolProfile')
     print(res.json()['Information1'])
     assert res.status_code == 200
     
-def test_updateSchoolProfile(AuthClient):
+def test_updateSchoolProfile(test_schoolData , AuthClient):
         res = AuthClient.put('/schoolUpdate',json={'institutionName':'Don Bosco'})
-        print(res.json()['status'])
+        print(res.json())
         
         assert res.status_code == 200
         
