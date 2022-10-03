@@ -1,6 +1,5 @@
 from fastapi import Depends,HTTPException,status ,APIRouter
 from sqlalchemy.orm import Session
-from typing import List
 from Model.schoolProfileModel import schoolProfile
 from DataBase import db
 from Authorization import auth
