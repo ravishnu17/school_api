@@ -7,11 +7,13 @@ from Controller.Router import manage_school
 from .Router import school_route, user_route
 from Model.userModel import user
 from DataBase import db
+from DataBase.db import engine
 from sqlalchemy import select , insert
 from Utils import encrypt
 from Configuration.config import setting
+from Model.schoolProfileModel.schoolProfile import Base
 
-# model.Base.metadata.create_all(bind=db.engine)
+Base.metadata.create_all(bind=engine)
     
 query = select(user.User.username).where(user.User.username == setting.adminuser)
 with db.engine.connect() as connect:
