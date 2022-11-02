@@ -133,26 +133,17 @@ def school_profile_data(db:Session=Depends(db.get_db) , current_user = Depends(a
 #convert dict to list or array   
 def setDynamic(data):
     #store
-    getKey:list=[] 
-    get:list=[]
-    set:list=[]
-    for list in data:
-        for keys in list:
-            getKey.append(keys)       
-        break    
-    
-    for list in data:
-        for load in getKey:
-            get.append(list[load])
-        set.append(get)
-        get=[] 
-    return set        
+    set = []
+    for i in data:
+        set.append(list(i.values()))
+    print(set)
+    return(set)       
         
 #update school profile details    
 @root.put('/schoolUpdate')
 def update_school(data : dict , db:Session=Depends(db.get_db) ,  current_user = Depends(auth.current_user)):
     if current_user.role !=1:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN , detail="Contact the Team")
+        raise HTTPException(status_code=status.htt , detail="Contact the Team")
     
     get_data = db.query(schoolProfile.SchoolProfile).filter(schoolProfile.SchoolProfile.user_id == current_user.id)   
     
